@@ -55,6 +55,8 @@
 - [HTTP와 연계하는 웹 서버](./NETWORK/HTTP/그림으로배우는_HTTP_CH5.md)
 - [HTTP 헤더](./NETWORK/HTTP/그림으로배우는_HTTP_CH6.md)
 
+### MySQL
+- [리플리케이션](./MYSQL/replication.md)
 
 ### AWS
 - [S3 + CloudFront + Route53 + Vuepress + Gulp을 활용한 SPA 어플리케이션 배포](./AWS/cloudfront_s3_route53_staticweb.md)
