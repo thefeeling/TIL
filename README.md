@@ -17,7 +17,7 @@
 ### Kotlin
 - [Kotlin With SpringBoot](./JVM/Kotlin/Kotlin_With_SpringBoot.md)
 - [코틀린의 코루틴(`Coroutine`)을 어떻게 이해할것인가?](./JVM/Kotlin/How_to_make_sense_of_Kotlin_coroutines.md)
-
+- [표준함수](./JVM/Kotlin/표준함수.md)
 
 ### JPA & ORM
 - [Alternatives to JPA](./JVM/Persistence/Alternative_JPA.md)
@@ -68,7 +68,7 @@
 - [20190305](./DIARY/20190305.md)
 - [20190307](./DIARY/20190307.md)
 - [20190311](./DIARY/20190311.md)
-- [20180501](./DIARY/20180501.md)
+- [20190501](./DIARY/20190501.md)
 - [20190504](./DIARY/20190504.md)
 - [20190507](./DIARY/20190507.md)
 - [20190526](./DIARY/20190526.md)
