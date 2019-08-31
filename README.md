@@ -23,6 +23,7 @@
 ### JPA & ORM
 - [Alternatives to JPA](./JVM/Persistence/Alternative_JPA.md)
 - [JPA_영속성 관리](./JVM/Persistence/영속성관리.md)
+- [컬렉션 및 부가기능](./JVM/Persistence/컬렉션_부가기능.md)
 
 ### Rx
 - [Reactive Programming](./JVM/Rx/Rx-1.md)
