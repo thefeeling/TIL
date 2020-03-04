@@ -56,6 +56,7 @@
 ### HTTP
 - [HTTP와 연계하는 웹 서버](./NETWORK/HTTP/그림으로배우는_HTTP_CH5.md)
 - [HTTP 헤더](./NETWORK/HTTP/그림으로배우는_HTTP_CH6.md)
+- [멱등성과 HTTP에 대한 생각](ARCHITECTURE/Idempotent.md)
 
 ### MySQL
 - [리플리케이션](./MYSQL/replication.md)
