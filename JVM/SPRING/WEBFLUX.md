@@ -1,3 +1,9 @@
+## Operator
+연산자의 종류는 매우 많으니, 일일이 설명하기는 힘든 부분이다. 아래 링크를 참고하자
+- [RxJS Marbles](https://rxmarbles.com/)
+
+## Stepverifier
+
 
 ## Blocking Call Handling
 ```java
@@ -10,7 +16,7 @@ JDBC를 사용하는 경우, JDBC에 대한 구현 자체가 Blocking-Call로 �
 
 - [리액티브하게 리팩토링하기 - JDBC 마이그레이션 해부](http://blog.lespinside.com/refactoring-to-react/)
 - [Spring 5 WebFlux and JDBC: To Block or Not to Block](https://dzone.com/articles/spring-5-webflux-and-jdbc-to-block-or-not-to-block)
-
+- [Spring: Blocking vs non-blocking: R2DBC vs JDBC and WebFlux vs Web MVC](https://technology.amis.nl/2020/04/10/spring-blocking-vs-non-blocking-r2dbc-vs-jdbc-and-webflux-vs-web-mvc/)
 
 ## WebClient
 ### Logging
