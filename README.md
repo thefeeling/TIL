@@ -19,11 +19,13 @@
 - [코틀린의 코루틴(`Coroutine`)을 어떻게 이해할것인가?](./JVM/Kotlin/How_to_make_sense_of_Kotlin_coroutines.md)
 - [표준함수](./JVM/Kotlin/표준함수.md)
 - [자바상호운용](./JVM/Kotlin/자바상호운용.md)
+- [Kotlin In Action](./JVM/Kotlin/KOTLIN-IN-ACTION.md)
 
 ### JPA & ORM
 - [Alternatives to JPA](./JVM/Persistence/Alternative_JPA.md)
 - [JPA_영속성 관리](./JVM/Persistence/영속성관리.md)
 - [컬렉션 및 부가기능](./JVM/Persistence/컬렉션_부가기능.md)
+- [JPA INSERT 성능 향상해보기](./JVM/Persistence/JPA_ENHANCE_INSERT.md)
 
 ### Rx
 - [Reactive Programming](./JVM/Rx/Rx-1.md)
