@@ -66,6 +66,8 @@ println("${KotlinVersion.CURRENT < KotlinVersion(major = 1, minor = 2, patch = 4
 #### 레시피 11.2 - 반복적으로 람다 실행하기
 - `repeat` 확장함수를 사용하면, 인자로 넘어가는 람다 구문이 지정한 횟수만큼 실행됨.
 - `contract`: 컴파일에게 함수의 호출횟수와 타입캐스팅을 도와주기위해 도입
+- `@InlineOnly`: 자바 상호 운용을 할때, 자바쪽에서 해당 구현을 참조하지 못하도록 마킹 역할 수행
+
 ```kotlin
 @kotlin.internal.InlineOnly
 public inline fun repeat(times: Int, action: (Int) -> Unit) {
@@ -74,5 +76,27 @@ public inline fun repeat(times: Int, action: (Int) -> Unit) {
     for (index in 0 until times) {
         action(index)
     }
+}
+```
+
+#### 레시피 11.3 - 완벽한 When 강제하기
+- 코틀린에서의 `When`절은 문과 식의 역할을 모두 할 수 있다.
+- 식으로 사용하는 경우, `else`까지 붙여 완벽한 형태로 사용해야 함.
+- 문으로 사용할 경우, 완벽하게 else까지 붙여서 사용할 수 있도록 강제도 할 수 있음. `exhaustive` 확장 속성을 추가하면 가능하다.
+  *TODO: Kotlin 1.3.72 환경에서 구문 에러가 발생.*
+```kotlin
+fun printMod3(n: Int) {
+    when (n % 3) {
+        1 -> println("$n % 3 = 0")
+        2 -> println("$n % 3 = 1")
+        3 -> println("$n % 3 = 2")
+    }
+}
+
+fun printMod3SingleStatement(n: Int) = when (n % 3) {
+    1 -> println("$n % 3 = 0")
+    2 -> println("$n % 3 = 1")
+    3 -> println("$n % 3 = 2")
+    else -> println("problems")
 }
 ```
