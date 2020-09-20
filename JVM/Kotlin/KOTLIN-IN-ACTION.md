@@ -300,3 +300,46 @@ fun `nextInt with range returns value in range`() {
 ```
 - `nextInt()`의 구현 부분을 살펴보면, 동반 객체에서 추상 클래스에 선언된 모든 메서드를 defaultPlatformRandom에 위임하고 있으며, 해당 defaultPlatformRandom은 internal로 선언되어 있음을 확인할 수 있다. 
 - [코틀린 문서](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.random/-random/-default/)를 확인해보면 `On JVM this generator is thread-safe, its methods can be invoked from multiple threads.` 난수 생성 시 스레드 세이프한 성격을 보장한다고 나와 있다.
+
+#### 레시피 11.11 - 함수 이름에 특수 문자 사용하기
+- 작명하기 아주 어려운 상황 혹은 테스트에서만 사용하는 것을 권한다.
+- 함수명을 백틱(``)으로 감싸 놓으면 특수 문자 등을 활용할 수 있다.
+```kotlin
+class TestClass {
+    @Test
+    fun `nextInt with min and max gives value between them`() { ... }
+}
+```
+
+#### 레시피 11.12 - 자바에게 예외 알리기
+- 코틀린의 모든 예외는 기본적으로 Unchecked Exception이다. 코틀린 컴파일러가 예외를 강제하지 않으며 굳이 잡는다면 try catch finally로 잡는 방법도 있지만 강제 사항은 아니다.
+- 자바에서처럼 `throws`키워드를 사용하여 예외가 발생할 수 있음을 알릴 수 없기 때문에 자바에서 만약 코틀린 코드를 사용한다면 이를 알릴 수 있는 장치가 필요하게 된다. `@Throws` 어노테이션을 활용하면 이것이 가능하다.
+```kotlin
+@Throws(IOException::class)
+fun houstonWeHaveAProblem() {
+    throw IOException("File or resource not found")
+}
+```
+- 위와 같이 어노테이션을 사용하게 되면, 자바 컴파일러는 IOException에 대비해야 하는 내용을 알게 된다.
+- 어노테이션을 명시하지 않고, 만약 자바코드에서 예외를 캐치하려고 한다면 컴파일이 실패하거나 불필요한 코드가 존재한다는 컴파일러 워닝을 만나게 될 것이다.
+- `@Throws` 어노테이션의 역할을 다시 정리하자면, 자바/코틀린의 통합을 위해 그리고 코틀린 코드에서 발생하는 예외를 자바 코드에서 대비하기 위해 존재하는 것이다.
+
+
+----
+## 12장
+#### 레시피 12.1 - 확장을 위해 스프링 관리 빈 클래스 오픈하기
+- 스프링에서는 빈으로 관리되는 클래스들 대부분이 프록시 기반으로 작동하게 된다.
+- 코틀린 클래스는 기본적으로 `final` 식별자를 달고 나오기 때문에 프록시를 동작이 안되게 된다. 이를 해결하기 위해서는 별도로 `kotlin-spring` 빌드 플러그인을 사용하여 스프링에서 관리하는 `@Component`, 
+ `@Service`으로 마킹된 클래스들이 확장 가능한 클래스 식별자인 `open`로 컴파일리 되도록 설정해줘야 한다.
+   * `all-open` 플러그인을 사용해도 되지만, 대부분 `kotlin-spring`플러그인이 커버한다.
+- 프록시는 실제 컴포넌트 메소드 호출을 가로채 호출 전후로 많은 일을 수행하게 된다. 인자에 대한 유효값 체크와 트랜잭션 등이 아주 대표적인 케이스이다. 
+
+```kotlin
+@org.springframework.stereotype.Service 
+public open class UserService public constructor() {
+    public open fun join(): kotlin.Unit { /* compiled code */ }
+}
+```
+- 플러그인을 적용하여 코드를 컴파일 결과이다.
+- @Component, @Async, @Transactional, @Cacheable, @SpringBootTest 들이 open이 되는 마킹 어노테이션들이며 사실상 대부분을 커버한다고 보면 된다. @Component의 경우 이를 사용하는 하위 어노테이션중에 친숙한 @Configuration, @Controller, @RestController, @Service, @Repository 들이 있다.
+
