@@ -341,5 +341,93 @@ public open class UserService public constructor() {
 }
 ```
 - 플러그인을 적용하여 코드를 컴파일 결과이다.
-- @Component, @Async, @Transactional, @Cacheable, @SpringBootTest 들이 open이 되는 마킹 어노테이션들이며 사실상 대부분을 커버한다고 보면 된다. @Component의 경우 이를 사용하는 하위 어노테이션중에 친숙한 @Configuration, @Controller, @RestController, @Service, @Repository 들이 있다.
+- `@Component`, `@Async`, `@Transactional`, `@Cacheable`, `@SpringBootTest` 들이 open이 되는 마킹 어노테이션들이며 사실상 대부분을 커버한다고 보면 된다. `@Component`의 경우 이를 사용하는 하위 어노테이션중에 친숙한 `@Configuration`, `@Controller`, `@RestController`, `@Service`, `@Repository` 들이 있다.
 
+
+
+#### 레시피 12.2 - 코틀린 data 클래스로 퍼시스턴스 구현하기
+- JPA 관점에서 코틀린 `data class`는 두 가지 문제가 존재함
+  * `data class`는 기본 생성자를 만들지 않음.
+  * 불변 속성(`val`)을 강조하는 data class의 성격
+- 기본 생성자를 만드는 부분에 대한 해결책은 `no-arg` 플러그인을 사용하는 방법이 존재한다.
+  > no-arg 플러그인으로 만든 기본 생성자의 접근 제어자는 `public`이고, 실제 코드에서는 접근이 불가능하며 리플렉션을 통한 접근만 가능하다고 한다.
+```kotlin
+plugins {
+  id "org.jetbrains.kotlin.plugin.noarg" version "1.4.10"
+}
+
+noArg {
+    annotation("com.my.Annotation")
+}
+```
+- `no-arg` 플러그인을 활용하는 방법도 좋지만, 빌드 설정에 마킹 어노테이션등을 명시해야 하는 불편함이 존재한다. 이를 개선하여 사용할 수 있는 플러그인이 바로 `kotlin-jpa` 플러그인이다.
+  * `@Entity`
+  * `@Embeddable`
+  * `@MappedSuperClass`
+- `data class`는 기본적으로 `hashCode`, `equals`, `toString`을 자동생성한다. JPA의 엔티티로 자동생성한 값을 사용하게 될 경우 발생할 수 있는 문제와 아래와 같다.
+  * 양방향 엔티티 바인딩을 사용할 경우, 경우에 따라 순환 참조를 만나게 될 수 있다.
+  * 불변 프로퍼티 사용을 권하는 data class와 다르게 필드 값을 계속 변경해야 하기 때문에 var로 선언해두고 사용해야 하는 JPA의 성격이 매우 상이함.
+- 이러한 부분 때문에 차라리 class를 그대로 사용하는 것이 나을 수 있다. 하지만, class도 코틀린에서는 기본적으로 상속이 불가능한 형태인 final 키워드가 붙어져 있는 형태기 때문에, 프록시를 사용하는 JPA-하이버네이트의 상황상 이를 `open` 클래스로 바꿔줘야 하는 불편함이 생긴다.
+```kotlin
+plugins {
+    id 'org.springframework.boot' version '2.3.1.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.3.72'
+    id 'org.jetbrains.kotlin.plugin.jpa' version '1.3.72'
+}
+
+allOpen {
+    annotation("javax.persistence.Entity")
+    annotation("javax.persistence.MappedSuperclass")
+    annotation("javax.persistence.Embeddable")
+}
+```
+
+- 위와 같이, kotlin-jpa 플러그인을 선언하고 open을 할 마킹 어노테이션을 지정해주면 실제로 컴파일한 클래스는 아래와 같다.
+
+```kotlin
+// IntelliJ API Decompiler stub source generated from a class file
+// Implementation of methods is not available
+
+package me.daniel.kotlin_in_action
+
+@javax.persistence.Entity 
+public open class User public constructor() {
+    public open var age: kotlin.Long? /* compiled code */
+
+    @field:javax.persistence.Id @field:javax.persistence.GeneratedValue public open var id: kotlin.Long? /* compiled code */
+
+    public open var name: kotlin.String /* compiled code */
+}
+```
+
+#### 레시피 12.3 - 의존성 주입하기
+- 스프링에서는 복잡한 의존성 주입 과정 그리고 빈과 빈의 연결을 컨테이너에서 처리해준다.
+- 코틀린에서는 필드 레벨 빈 의존성 주입을 할 경우 `lateinit var` 구조를 활용해야 한다. 생성자 기반의 주입도 가능하다.
+- 생성자 방식의 의존성 주입이 스프링에서 선호하는 의존성 주입 방식이긴 하나, 경우에 따라 필드 레벨의 주입이 필요한 경우도 있다. 
+
+```kotlin
+// 1)
+@Service
+class UserServiceByConstructorInjection(val contentService: ContentService)
+
+// 2)
+@Service
+class UserServiceByConstructorInjectionWithFieldAutowired(@Autowired val contentService: ContentService)
+
+// 3)
+@Service
+class UserServiceByConstructorInjectionWithAutowired @Autowired constructor(val contentService: ContentService)
+
+// 4)
+@Service
+class UserServiceByFieldLevelInjection {
+    @Autowired private lateinit var contentService: ContentService
+}
+```
+- 위와 같이 다양한 형태로 의존성 주입을 받는 것이 가능하다. `@Autowired`를 굳이 안붙여서도 사용 가능한 1번의 형태가 가장 간편한 방법이고 스프링에서 추천하는 의존성 주입 방식이다.
+
+
+----
+## 13장 - 코루틴과 구조적 동시성
+#### 레시피 13.1 - 코루틴 빌더 선택하기
