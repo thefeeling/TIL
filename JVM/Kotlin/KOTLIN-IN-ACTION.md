@@ -431,3 +431,34 @@ class UserServiceByFieldLevelInjection {
 ----
 ## 13장 - 코루틴과 구조적 동시성
 #### 레시피 13.1 - 코루틴 빌더 선택하기
+- `GlobalScope`의 `async`와 `launch`는 사용하지 말자
+  - 취소되지 않으면 어플리케이션 전체 수명주기에 걸쳐 실행됨.
+
+- `runBlocking` 빌더
+    ```kotlin
+    public fun <T> runBlocking(context: CoroutineContext = EmptyCoroutineContext, block: suspend CoroutineScope.() -> T): T    
+    ```
+    * 블록 내 모든 코루틴이 종료될 때까지 현재 스레드를 블록
+    * `suspend` 키워드가 붙은 함수가 아니기 때문에, 일반 함수에서도 호출 가능
+
+
+- `async` 빌더
+    ```kotlin
+    public fun CoroutineScope.launch(
+        context: CoroutineContext = EmptyCoroutineContext,
+        start: CoroutineStart = CoroutineStart.DEFAULT,
+        block: suspend CoroutineScope.() -> Unit
+    ): Job
+    ```
+    * 해당값에서 리턴값을 받을 필요가 없을 때 사용
+    * `Job`을 리턴, 취소 가능
+    * 코루틴 컨텍스트(`context`)를 지정하여 다른 코루틴과 상태 공유가 가능
+    * `start` 인자의 열거형으로 `DEFAULT`, `LAZY`, `ATOMIC`, `UNDISPATCHED` 값을 사용할 수 있다.
+
+- `launch` 빌더
+
+#### 레시피 13.2 - async/await를 withContext로 변경하기
+#### 레시피 13.3 - 디스패처 사용하기
+#### 레시피 13.4 - 자바 스레드 풀에서 코루틴 실행하기
+#### 레시피 13.5 - 코루틴 취소하기
+#### 레시피 13.6 - 코루틴 디버깅
