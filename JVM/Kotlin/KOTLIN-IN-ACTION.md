@@ -442,7 +442,7 @@ class UserServiceByFieldLevelInjection {
     * `suspend` 키워드가 붙은 함수가 아니기 때문에, 일반 함수에서도 호출 가능
 
 
-- `async` 빌더
+- `launch` 빌더
     ```kotlin
     public fun CoroutineScope.launch(
         context: CoroutineContext = EmptyCoroutineContext,
@@ -455,10 +455,122 @@ class UserServiceByFieldLevelInjection {
     * 코루틴 컨텍스트(`context`)를 지정하여 다른 코루틴과 상태 공유가 가능
     * `start` 인자의 열거형으로 `DEFAULT`, `LAZY`, `ATOMIC`, `UNDISPATCHED` 값을 사용할 수 있다.
 
-- `launch` 빌더
+- `async` 빌더
+    ```kotlin
+    public fun <T> CoroutineScope.async(
+        context: CoroutineContext = EmptyCoroutineContext,
+        start: CoroutineStart = CoroutineStart.DEFAULT,
+        block: suspend CoroutineScope.() -> T
+    ): Deferred<T>    
+    ```
+    * 값을 리턴해야 할 경우 사용
+    * `launch` 빌더처럼 CoroutineContext와 CoroutineStart 파라미터를 받을 수 있으며, 기본값이 설정되어 있다.
+    ```kotlin
+    suspend fun add(x: Int, y: Int): Int {
+        delay(Random.nextLong(1000L))
+        return x + y
+    }
+
+    suspend fun main() = coroutineScope {
+        val firstSum = async {
+            println(Thread.currentThread().name)
+            add(2, 2)
+        }
+        val secondSum = async {
+            println(Thread.currentThread().name)
+            add(3, 4)
+        }
+        println("Awaiting concurrent sums...")
+        val total = firstSum.await() + secondSum.await()
+        println("Total is $total")
+
+    }    
+    ```
+    ```
+    DefaultDispatcher-worker-1
+    Awaiting concurrent sums...
+    DefaultDispatcher-worker-2
+    Total is 11
+    ```
+    - 위 예제의 실행 결과를 보면 `async` 빌더는 기본 디스패처를 사용하는 것을 확인할 수 있다.
+    - `delay` 함수는 코루틴 실행 스레드를 블록하지 않고 대기 상태로 만든다.
+
+- `coroutineScope` 빌더
+    ```kotlin
+    public suspend fun <R> coroutineScope(block: suspend CoroutineScope.() -> R): R {
+        contract {
+            callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+        }
+        return suspendCoroutineUninterceptedOrReturn { uCont ->
+            val coroutine = ScopeCoroutine(uCont.context, uCont)
+            coroutine.startUndispatchedOrReturn(coroutine, block)
+        }
+    }    
+    ```
+
+    * `coroutineScope` 빌더는 함수 종료 전 모든 코루틴이 완료될때까지 기다리는 일수 중단 함수이다. 굳이 코루틴의 완료 유무를 확인할 필요가 없다.
+    * 메인 스레드를 블록하지 않지만, 반드시 다른 일시 중단 함수의 일부로서 호출해야 된다.
+    * 코루틴이 하나라도 실패하면 나머지 코루틴을 취소하며, 완료 유무를 확인하지 않고 균형 있는 제어와 에러 처리를 달성하고 루틴이 실패하는 경우를 처리하지 않는 것을 방지한다.
+
+
 
 #### 레시피 13.2 - async/await를 withContext로 변경하기
+```kotlin
+public suspend fun <T> withContext(
+    context: CoroutineContext,
+    block: suspend CoroutineScope.() -> T
+): T    
+```
+
+- `async` 코루틴을 시작하고 `await`로 기다리는 코드를 간소화하고 싶다면 `withContext`로 대체가 가능하다.
+- 공식 문서에서는 **주어진 코루틴 컨텍스트와 함께 명시한 일시정지 블록을 호출하고, 완료될 떄까지 일시정지한 후에 그 결과를 리턴한다.** 라고 나와 있다. 다시 말해, `async ~ await`의 호출 구조를 `withContext`로 단순화하는 것이 가능하다.
+
+```kotlin
+suspend fun retrieve1(url: String) = coroutineScope {
+    async(Dispatchers.IO) {
+        println("Retrieving data on ${Thread.currentThread().name}")
+        delay(100L)
+        "asyncResults"
+    }.await()
+}
+
+suspend fun retrieve2(url: String) = withContext(Dispatchers.IO) {
+    println("Retrieving data on ${Thread.currentThread().name}")
+    delay(100L)
+    "asyncResults"
+}
+
+fun main() = runBlocking<Unit> {
+    val result1 = retrieve1("www.mysite.com")
+    val result2 = retrieve2("www.mysite.com")
+    println("printing result on ${Thread.currentThread().name} $result1")
+    println("printing result on ${Thread.currentThread().name} $result2")
+}
+```
+
+```
+Retrieving data on DefaultDispatcher-worker-1
+Retrieving data on DefaultDispatcher-worker-1
+printing result on main asyncResults
+printing result on main asyncResults
+```
+
+
+- `retrieve1`과 같이 메소드를 작성하게 되면 Intellij에서 `merge call chain to 'withContext'`라는 문구와 함께 withContext로 대체 할 것을 제안하는 것을 확인할 수 있다.
+
+- 각 suspend 함수는 기본 디스패처에서 호출이 되며, 메인 스레드 메인 함수에서 `await` 호출 없이 결과를 받아 오는 것을 확인할 수 있다.
+
+
 #### 레시피 13.3 - 디스패처 사용하기
+- IO 혹은 다른 작업을 위한 전용 스레드풀을 이용할 때는 `Dispatchers` 클래스의 적당한 디스패처를 골라 사용하면 된다.
+- 코루틴은 `CorutineContext` 컨텍스트 내에서 실행되며 코루틴 컨텍스트에는 `CoroutineDispatcher` 클래스의 인스턴스가 포함되어 있다. 
+- **디스패처의 역할은 코루틴이 어떤 스레드에서 혹은 어떤 스레드풀에서 실행할지를 결정한다.** 디스패처의 종류는 아래와 같다.
+  * IO
+  * Default
+  * Unconfined
+
+- 디스패처의 명시는 `async`, `launch`, `withContext`의 호출 인자에 넘겨서 지정하는 것이 가능하다.
+
 #### 레시피 13.4 - 자바 스레드 풀에서 코루틴 실행하기
 #### 레시피 13.5 - 코루틴 취소하기
 #### 레시피 13.6 - 코루틴 디버깅
