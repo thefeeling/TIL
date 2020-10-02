@@ -565,12 +565,136 @@ printing result on main asyncResults
 - IO 혹은 다른 작업을 위한 전용 스레드풀을 이용할 때는 `Dispatchers` 클래스의 적당한 디스패처를 골라 사용하면 된다.
 - 코루틴은 `CorutineContext` 컨텍스트 내에서 실행되며 코루틴 컨텍스트에는 `CoroutineDispatcher` 클래스의 인스턴스가 포함되어 있다. 
 - **디스패처의 역할은 코루틴이 어떤 스레드에서 혹은 어떤 스레드풀에서 실행할지를 결정한다.** 디스패처의 종류는 아래와 같다.
-  * IO
-  * Default
+  * IO:  File IO 혹은 Network IO와 같은 IO Intensive 작업을 위해 디자인된 디스패처이며, On-Demand 공유 풀을 사용한다.
+  * Default:  공유 백그라운드 스레드풀을 사용하며, CPU Bound 상황에 어울린다.
   * Unconfined
-
 - 디스패처의 명시는 `async`, `launch`, `withContext`의 호출 인자에 넘겨서 지정하는 것이 가능하다.
 
 #### 레시피 13.4 - 자바 스레드 풀에서 코루틴 실행하기
+- 자바의 `ExecutorService`의 `asCoroutineDispatcher` 확장 함수 호출을 통해 코루틴의 스레드풀 생성이 가능하다. 
+- `asCoroutineDispatcher` 함수는 `ExecutorService`의 인스턴스를 `ExecutorCoroutineDispatcher`의 구현으로 변환한다. 
+
+```kotlin
+public abstract class ExecutorCoroutineDispatcher: CoroutineDispatcher(), Closeable {
+    /** @suppress */
+    @ExperimentalStdlibApi
+    public companion object Key : AbstractCoroutineContextKey<CoroutineDispatcher, ExecutorCoroutineDispatcher>(
+        CoroutineDispatcher,
+        { it as? ExecutorCoroutineDispatcher })
+
+    public abstract val executor: Executor
+
+    public abstract override fun close()
+}
+```
+
+- `ExecutorCoroutineDispatcher`는 `close` 함수를 호출하지 않으면 계속 실행되기 때문에, 해당 함수 호출은 필수다. `ExecutorCoroutineDispatcher` 클래스는 추상 클래스로 구현 클래스인 `ThreadPoolDispatcher`의 `close` 메소드를 살펴보면 ExecutorService의 `shutdown` 메소드를 호출하는 것을 확인할 수 있다.
+- `Closeable` 인터페이스를 구현하여 `close` 혹은 `shutdown` 호출에 대한 부분은 해당 인터페이스 구현에 맡겼으며 코틀린에서는 `use` 블록을 사용하여 사용 후 쉽게 종료가 가능하다. 
+> 자바와 같이 try~with~resource 구문이 없는 코틀린에서는 Closeable 인터페이스 use를 사용하여 자원 해제를 하게 된다. [링크](#10장) 참고
+
+
 #### 레시피 13.5 - 코루틴 취소하기
+```kotlin
+private fun jobCancelExec() {
+    runBlocking {
+        val job = launch {
+            repeat(100) {
+                println("Job: I'm waiting $it...")
+                delay(100L)
+            }
+        }
+        delay(500L)
+        println("main: That's enough waiting")
+        job.cancel()
+        job.join()
+        println("main: Done")
+    }
+}
+```
+- `launch`, `async` 빌더 함수는 공통적으로 Job 타입을 리턴하게 되는데, 해당 타입의 cancel 메소드를 호출하면 해당 잡을 취소하는 것이 가능하다.
+
+```kotlin
+private fun jobTimeout() {
+    runBlocking {
+        withTimeout(1000L) {
+            repeat(50) {
+                println("Job: I'm waiting $it...")
+                delay(100L)
+            }
+        }
+    }
+}
+```
+
+```kotlin
+public suspend fun <T> withTimeout(timeMillis: Long, block: suspend CoroutineScope.() -> T): T
+```
+- `withTimeout` 혹은 `withTimeoutOrNull`과 같은 메소드를 호출하여 취소하는 것도 가능하며, 타임아웃이 초과하면 `TimeoutCancellationException`이 발생한다.
+```
+Job: I'm waiting 0...
+Job: I'm waiting 1...
+...(생략)
+Exception in thread "main" kotlinx.coroutines.TimeoutCancellationException: Timed out waiting for 1000 ms
+	at kotlinx.coroutines.TimeoutKt.TimeoutCancellationException(Timeout.kt:158)
+	at kotlinx.coroutines.TimeoutCoroutine.run(Timeout.kt:128)
+	at kotlinx.coroutines.EventLoopImplBase$DelayedRunnableTask.run(EventLoop.common.kt:497)
+	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:274)
+	at kotlinx.coroutines.DefaultExecutor.run(DefaultExecutor.kt:68)
+	at java.lang.Thread.run(Thread.java:745)
+```
 #### 레시피 13.6 - 코루틴 디버깅
+- JVM의 실행 플래그(`-Dkotlinx.coroutines.debug`)를 추가하면 코루틴 이름등과 같은 실행정보를 확인할 수 있다. Intelli에서는 VM Options에 해당 플래그 값을 추가하면 된다.
+
+```kotlin
+suspend fun retrieve1(url: String) = coroutineScope {
+    async(Dispatchers.IO) {
+        println("Retrieving data on ${Thread.currentThread().name}")
+        delay(100L)
+        "asyncResults"
+    }.await()
+}
+
+suspend fun retrieve2(url: String) = withContext(Dispatchers.IO) {
+    println("Retrieving data on ${Thread.currentThread().name}")
+    delay(100L)
+    "asyncResults"
+}
+
+fun main() = runBlocking {
+    val result1 = retrieve1("www.mysite.com")
+    val result2 = retrieve2("www.mysite.com")
+    println("printing result on ${Thread.currentThread().name} $result1")
+    println("printing result on ${Thread.currentThread().name} $result2")
+}
+```
+
+```
+Retrieving data on DefaultDispatcher-worker-1 @coroutine#2
+Retrieving data on DefaultDispatcher-worker-1 @coroutine#1
+printing result on main @coroutine#1 asyncResults
+printing result on main @coroutine#1 asyncResults
+```
+- 스레드 이름 뒤에 `@coroutine#2`가 붙은 것을 확인할 수 있는데, `CoroutineName` 클래스를 사용하여 직접 이름을 붙이는 것도 가능하다. 위 코드에서 `retrieve1`, `retrieve2`의 컨텍스트를 인자 부분을 아래와 같이 수정하면 된다.
+```kotlin
+suspend fun retrieve1(url: String) = coroutineScope {
+    async(Dispatchers.IO + CoroutineName(name = "async")) {
+        println("Retrieving data on ${Thread.currentThread().name}")
+        delay(100L)
+        "asyncResults"
+    }.await()
+}
+
+suspend fun retrieve2(url: String) = withContext(Dispatchers.IO + CoroutineName(name = "withContext")) {
+    println("Retrieving data on ${Thread.currentThread().name}")
+    delay(100L)
+    "asyncResults"
+}
+```
+
+```
+// coroutine이라는 이름 대신 지정한 이름을 노출
+Retrieving data on DefaultDispatcher-worker-1 @async#2
+Retrieving data on DefaultDispatcher-worker-1 @withContext#1
+printing result on main @coroutine#1 asyncResults
+printing result on main @coroutine#1 asyncResults
+```
