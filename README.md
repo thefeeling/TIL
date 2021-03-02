@@ -19,7 +19,8 @@
 - [코틀린의 코루틴(`Coroutine`)을 어떻게 이해할것인가?](./JVM/Kotlin/How_to_make_sense_of_Kotlin_coroutines.md)
 - [표준함수](./JVM/Kotlin/표준함수.md)
 - [자바상호운용](./JVM/Kotlin/자바상호운용.md)
-- [Kotlin In Action](./JVM/Kotlin/KOTLIN-IN-ACTION.md)
+- [Kotlin COOKBOOK](./JVM/Kotlin/KOTLIN-COOKBOOK.md)
+- [Kotlin-In-Action](./JVM/Kotlin/KOTLIN-IN-ACTION.md)
 
 ### JPA & ORM
 - [Alternatives to JPA](./JVM/Persistence/Alternative_JPA.md)
