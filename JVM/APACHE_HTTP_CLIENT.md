@@ -1,6 +1,3 @@
-
-
-
 #### The target server failed to respond 에러 관련 이슈
 `ConnectionManager`에 의해 관리되는 `Persistent Connection`들은 KeepAlive한 상태를 유지할때 대상 서버는 HttpClient가 해당 이벤트에 반응할 수 없는 상태에서 그 끝에 있는 연결을 종료하고 연결이 유휴 상태가 되어 연결이 반쯤 닫히거나 'stale'이 됩니다. 해당 상태로 빠진 커넥션들은 정리가 필요하며, 이를 처리하기 위해서 HttpClient에서는 idleConnection과 expiredConnection에 대해 별도 스레드에서 정리할 수 있도록 설정할 수 있다. 또한 `ConnectionManager`를 별도로 지정하여 validate 타임을 지정할 수 있다.
 
@@ -15,7 +12,6 @@ final CloseableHttpClient client = HttpClientBuilder.create()
         .evictExpiredConnections()
         .evictIdleConnections(1000 * 30, TimeUnit.SECONDS)
         .build();
-
 ```
 **참고 링크**
 - https://www.baeldung.com/httpclient-connection-management
