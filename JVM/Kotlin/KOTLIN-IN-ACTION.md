@@ -256,8 +256,33 @@ val t: String? = s // String이 String?의 하위 타입이므로 이 대입은 
 - **공변 vs 반공변 vs 무공변**
   | 공변성 | 반공변성 | 무공변성 |
   |:---|:---|:---|
-  | Producer<out T> | Consumer<in T> | MutableList<T> |
-  | 타입 인자의 하위 타입 관계가 <br/>제네릭 타입에서도 유지된다. | 타입 인자의 하위 타입 관계가<br/>제네릭   타입에서 뒤집힌다. | 하위 타입 관계가 성립하지 않음 |
-  | Producer<Cat>은 Producer<Animal>의 하위 타입이다.| Consumer<Animal>은 Consumer<Cat>의   하위 타입이다. | |
+  | `Producer<out T>` | `Consumer<in T>` | `MutableList<T>` |
+  | 타입 인자의 하위 타입 관계가 <br/>제네릭 타입에서도 유지된다. | 타입 인자의 하위 타입 관계가<br/>제네릭 타입에서 뒤집힌다. | 하위 타입 관계가 성립하지 않음 |
+  | `Producer<Cat>`은 `Producer<Animal>`의 하위 타입이다.| `Consumer<Animal>`은 `Consumer<Cat>`의   하위 타입이다. | |
   | T를 아웃 위치에서만 사용 | T를 인 위치에서만 사용 | T를 아무 위치에서나 사용 가능 |
 
+- 아래 Function 인터페이스은 공변과 반공변을 설명하기 아주 좋은 예제이다. 인자로 받는 P 타입에 대해서는 반공변성을 유지하며, R 타입에 대해서는 공변성을 띄게 된다. 
+```kotlin
+interface Function1<in P, out R> {
+    operator fun invoke(p: P): R
+} 
+```
+- Cat과 Animal의 예제를 위 Function1에 대입해보면 `(Cat) -> Number`와 `(Animal) -> Int`에서도 하위 타입 관계가 성립하게 된다. 위 Function1의 경우 코틀린의 표현으로 바꿔보자면 `(Cat) -> Number`를 받는 인자에 `(Animal) -> Int`의 함수 인스턴스를 넘기더라도 하위 타입 관계가 성립하기 때문에 호출에 문제가 없게 되는 것이다. 
+
+> 다시 정리하면 반공변의 경우 타입의 하위 관계를 반대로, 공변의 경우 타입의 하위 관계를 그대로 유지, 무공변의 경우 타입 파라미터간의 하위 타입 관계가 전혀 없는 것으로 정리할 수 있다.
+
+- **변성의 종류**
+  * `선언 지점 변성(declaration site variance)`: 클래스 선언에 지정하는 것을 선언 지점 변성이라 부르며, 한번의 선언만으로 변성을 추가 지정할 필요가 없으므로 코드가 간결해진다. 
+  * `사용 지점 변성(use site variance)`: 자바에서처럼 타입 파라미터가 있는 타입을 사용할때 마다 해당 타입 파라미터를 하위 타입이나 상위 타입 중 어떤 타입으로 대치할 수 있는지 명시하는 방법을 사용 지점 변성이라고 한다. 자바의 `한정 와일드카드 타입(bounded wildcard)`을 사용하는 것을 생각하면 된다.(`? extends` , `? super`) 물론 **코틀린도 자바에서처럼 사용 지점 변성을 지원한다.** 공변적이거나 혹은 반공변적인지 선언할 수 없다면 사용 지점 변성을 사용하여 타입 파라미터가 나오는 지점에 변성을 정의하면 된다.
+
+- 변성을 지정하지 않은 클래스를 사용할 때 변성에 대한 지정이 가능하다. 대표적인 예제로 MutableList가 있다. MutableList는 타입 파라미터로 넘어는 값을 생산할 수도 있고 소비할수도 있게 되는데, 변성에 대한 지정을 통하여 이를 제어할 수 있게 된다.
+```kotlin
+fun <T> copyData(source: MutableList<out T>, destination: MutableList<T>) {
+	for(item in source) {
+		destination.add(item)
+	}
+}
+```
+- 위 예제에서 `source`의 타입 선언을 `MutableList<out T>`로 지정해뒀는데, out 키워드를 붙임으로서 무공변인 MutableList에서 공변으로 제약을 붙인 타입으로 프로젝션을 시킬 수 있게 된다. 이럴 경우 값을 소비하는 add 함수등을 사용하게 될 경우 `Out-projected type ....`과 같은 에러를 만나게 될 수 있다. 
+- **정리하면, 타입 선언에서 [타입 파라미터를 사용하는 위치]라면 어디에나 [변성 변경자]를 붙일 수 있으며, [파라미터 타입, 로컬 변수 타입, 함수 반환 타입] 등에 타입 파라미터가 쓰이는 경우 in이나 out 변경자를 붙일 수 있다. 이를 가리켜 `타입 프로젝션(type projection)`이라 부른다.**
+  * `List<out T>`처럼 이미 변성 변경자가 붙어 있는 클래스에 out 프로젝션을 하는 것은 의미가 없으므로 컴파일러와 IDE가 친절하게(?) 경고를 하게 될 것이다.
