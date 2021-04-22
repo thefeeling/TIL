@@ -39,6 +39,8 @@
 - [애그리거트(Aggregate)](./ARCHITECTURE/DDD/DDD-3.md)
 
 ### 객체지향
+- [엘레강트 오브젝트](./ARCHITECTURE/ELEGANT_OBJECT.md)
+
 
 ### JavaScript & ES
 - [JavaScript_this 바인딩(함수/객체)](./JAVASCRIPT/Core/Function.md)
