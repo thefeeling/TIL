@@ -46,15 +46,79 @@ public Iterable<File> find(Mask mask) {
 ```
 
 
-### 3.4충성스러우면서 불변이거나, 아니면 상수이거나
+### 3.4 충성스러우면서 불변이거나, 아니면 상수이거나
+- 많은 사람들이 상태(`state`)와 데이터(`data`)를 오해하고 있음
+- 객체란 디스크에 있는 파일, 웹 페이지 혹은 메모리에 존재하는 바이트 배열, 해시맵 등과 같은 실제 엔티티의 대표자이다.
+```java
+// 아래 코드에서 File 객체는 실제 파일의 대표자 역할을 수행
+public void echo() {
+	File f = new File("/tmp/test.txt");
+	System.out.println("File size : %d", f.length());
+}
+```
+- 일반적인 객체는 식별자(identity), 상태(state), 행동(behavior)를 포함. 
+
 ### 3.5 절대 getter와 setter를 사용하지 마세요
+- 클래스는 다르다. 어떤 식으로든 맴버에게 접근하는 것을 허용하지 않으며, 노출을 하지도 않는다. 할 수 있는 일은 오직 객체에게 `요청`하는 것 뿐이다.
+- 자료구조는 `glass box`, 객체는 `black box`
+- ***프로그래밍에서 가시성의 범위를 줄이는 것은 사물을 단순화시키는 것이며 이해의 범위가 작을수록 유지보수성과 코드의 대한 이해/수정이 쉬워진다.***
+- `Getter/Setter`는 클래스를 자료구조로 사용하는 목적에서 도입이 되었다. 이는 곧, 발가벗겨진 데이터가 그대로 노출이 되며 절차적인 프로그래밍 스타일을 사용하도록 부추기게 된다.
+- `Getter/Setter`는 데이터가 무방비로 `public`하게 노출되어 있는 것과 마찬가지이다. 결국 이러한 형태의 객체는 하나의 데이터로서 역할만을 수행할 수 밖에 없다.
+
 ### 3.6 부 ctor 밖에서는 new를 사용하지 마세요
+- 클래스가 작고 단순하며 네트워크나 디스크, 데이터베이스 등의 값비싼 자원을 사용하지 않는다면 전혀 문제가 되지 않을 것이다.
+```java
+public class Cash {
+	private final int dollars;
+
+	public int euro() {
+		return new Exchange().rate("USD", "EUR") * this.dollars;
+	}
+}
+```
+- `euro()` 메소드를 사용할때마다 원격지와 통신을 하게 될 경우에 이 객체를 사용하는 사용자 입장에서는 매번 원격지와의 통신을 강요받을 수 밖에 없다. 이러한 결합을 피하기 위해서는 코드 자체를 수정할 수 밖에 없는데 이런식의 수정은 테스트와 유지보수성을 급격하게 낮출 수 밖에 없다. 다시 말해, 의존성에 대한 제어를 `Cash` 클래스 자신이 하고 있는 상황이다.
+
+```java
+public class Cash {
+	private final int dollars;
+	private final Exchange exchange;
+
+	Cash(int value, Exchange exchange) {
+		this.dollars = value;
+		this.exchange = exchange;
+	}
+
+	public int euro() {
+		return this.rate("USD", "EUR") * this.dollars;
+	}
+}
+```
+- 위와 같이 코드를 수정하게 될 경우, 생성자를 통하여 제공받은 `Exchange`와 협력을 할 수 있게 된다.
+- 의존성에 대한 제어 주체가 `Cash` 클래스가 아닌 외부 혹은 사용하는 쪽에서 제어할 수 있도록 수정이 되었다.
+- 객체가 필요한 의존성을 직접 생성하는 대신, 생성자를 통해 **의존성을 주입** 받으며 `Exchange` 타입의 의존성 즉 직접 작성한 코드 혹은 다른 객체를 주입하여 해당 객체가 호출이 되도록 **제어의 역전**을 수행하게 된다.
+
+
 ### 3.7 인트로스펙션과 캐스팅을 피하세요
+```java
+public <T> int size(Iterable<T> items) {
+	if (items instanceof Collection) {
+		return Collection.class.cast(items).size()
+	}
+	int size = 0;
+	for (T item: items) {
+		++size;
+	}
+	return size;
+}
+```
+- 런타임에 객체 타입을 조사하는 것은 클래스 사이의 결합도가 높아지기 때문에 기술적인 관점에서 좋지 않음
+- 위 예제에서는 `Iterable`과 `Collection` 인터페이스에 의존을 하고 있으며, 대상이 많아질수록 별도의 분기와 코드가 생겨나기 때문에 유지보수성이 좋아질 수가 없을 것이다.
+- 취급하는 타입에 따라 객체를 차별하기 때문에 자율성이라는 객체지향의 기본적인 베이스 정신을 훼손하는 코드라고 한다.
 
 ## 4장 은퇴
 ---
 ### 4.1 절대 NULL을 반환하지 마세요
-### 4.2체크 예외(checked exception)만 던지세요
+### 4.2 체크 예외(checked exception)만 던지세요
 ### 4.3 final이거나 abstract이거나
 ### 4.4 RAII를 사용하세요
 

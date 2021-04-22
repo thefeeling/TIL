@@ -49,7 +49,7 @@
 - [ES6 디폴트 파라메터 / Spread 연산자](./JAVASCRIPT/Core/ES6_defaultparameter_spreadoperator.md)
 - [ES6 let,const](./JAVASCRIPT/Core/ES6_let_const.md)
 - [(번역)Unit Testing React/Redux](./JAVASCRIPT/React/React-Redux-Test.md)
-- [(번역)Best Practices for Spies, Stubs and Mocks in Sinon.js](./JAVASCRIPT/Test/BestPracticesforSpiesStubsAndMocksinSinon.js.md.md)
+- [(번역)Best Practices for Spies, Stubs and Mocks in Sinon.js](./JAVASCRIPT/Test/BestPracticesforSpiesStubsAndMocksinSinon.js.md)
 
 
 ### Node.js
