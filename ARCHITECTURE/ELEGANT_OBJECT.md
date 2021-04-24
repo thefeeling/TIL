@@ -114,11 +114,109 @@ public <T> int size(Iterable<T> items) {
 - 런타임에 객체 타입을 조사하는 것은 클래스 사이의 결합도가 높아지기 때문에 기술적인 관점에서 좋지 않음
 - 위 예제에서는 `Iterable`과 `Collection` 인터페이스에 의존을 하고 있으며, 대상이 많아질수록 별도의 분기와 코드가 생겨나기 때문에 유지보수성이 좋아질 수가 없을 것이다.
 - 취급하는 타입에 따라 객체를 차별하기 때문에 자율성이라는 객체지향의 기본적인 베이스 정신을 훼손하는 코드라고 한다.
+- 타입 체킹 혹은 캐스팅을 하려거든 차라리 `메소드 오버로딩(method overloading)`을 활용하자.
+```java
+public <T> int size(Iterable<T> items) {
+	int size = 0;
+	for (T item: items) {
+		++size;
+	}
+	return size;
+}
 
+public <T> int size(Collection<T> items) {
+	return items.size();
+}
+
+```
 ## 4장 은퇴
 ---
 ### 4.1 절대 NULL을 반환하지 마세요
+- 객체를 장애를 가진 존재로 취급해서는 안된다
+- 항상 `NullPointerException` 예외가 던져질지 모른다는 사실은 기술적인 불편함을 넘어서서 해당 객체에 대한 `신뢰`가 무너졌다는 사실이다. 결국, ***객체에게 작업을 요청한 후 안심하고 결과에 의지할 수 없다.*** 또한,  이는 곧 유지보수성의 심각한 손실로 이어진다.
+- **객체라는 사상에는 우리가 신뢰하는 엔티티라는 개념이 담겨져 있다.**
+- 객체는 자신이 맡은 일을 수행하는 방법을 스스로 결정한다. 
+```java
+void list(File dir) {
+	File[] files = dir.listFiles();
+	// 매번 아래와 같은 체크를 해야 한다면, 장황한 코드의 추가와 더불어 매번 반환값을 확인해야 한다.
+	if (files == null) {
+		throw new IOException("Directory is absent");
+	}
+	for (File file : files) {
+		System.out.println(file.getName());
+	}
+}
+```
+- `빠르게 실패하기 원칙(fail fast principle)`, `null`을 리턴하는 대신 예외를 던져 빠르게 실패하는 것.
+- `빠르게 실패하기 원칙` vs `안전하게 실패하기`
+  - 안전하게 실패하기는 버그, 입출력 문제, 메모리 오버플로우 등이 발생한 상황에서도 소프트웨어가 계속 실행될 수 있도록 최대한 많은 노력을 기울이는 것
+  - 빠르게 실패하기는 일반 문제가 발생하면 곧바로 실행을 중단하고 빠르게 예외를 던짐. 실패를 감추는 대신 강조.
+- 어떤 버그는 명확하지만, 또 그렇지 않고 조용히 숨어 있는 경우가 있다.
+  > 버그가 존재하는 사실을 숨기는 것은 스스로에게 죄를 짓고 있는 것이며 상처를 드러내어 치료하는 대신, 상처를 숨기고 모든 일이 순조롭게 진행되고 있다고 환자에게 거짓말을 하는 행위이다. 
+- NULL의 대안은?
+  - 메소드를 분리
+  ```java
+  // 아래의 경우, DB IO가 두번 발생하여 비효율적이다.
+  public boolean exists(String name) {
+	  if (/*DB에 없다면*/) {
+		  return false;
+	  }
+	  return true;
+  }
+  
+  public User user(String name) {
+	  return /* From DB */
+  }
+  ```
+  - NULL을 반환하는 대신 기본값을 반환
+  ```java
+  public Collection<User> users(String name) {
+	if (/*DB에 없다면*/) {
+		return emptyList();
+	}
+	return Collections.singleton(/* From DB */)
+  }
+  ```
+  - `Optional`과 같은 클래스를 활용
+  - `Null` Object를 만드는 방법
+  ```java
+  public class NullUser implements User {
+	private final String label;
+	NullUser(String name) {
+		this.label = name;
+	}
+
+	@Override
+	public String name() {
+		return this.label;
+	}
+
+	@Override
+	public void raise() {
+		throw new IllegalStateException("인상 못해유~")
+	}
+  }
+  ```
 ### 4.2 체크 예외(checked exception)만 던지세요
+- Checked Exception은 메소드를 호출하는 쪽에 예외를 처리하도록 강제할 수 있다. 
+Method에 명시적으로 예외의 타입이 노출이 되기 때문에 어떤 종류의 예외가 발생할지 예측할 수 있다. 다시 말해, 책임을 클라이언트에 전달하면서 제 자신이 안전하지 않다라고 선언하는 샘이다.
+- UnChecked Exception의 경우, 별도로 예외를 처리하지 않으면 최상위로 전달~ 전달~
+- 꼭 필요한 경우가 아니라면 예외는 안잡는 것이 최선이다. 예외를 처리할때는 반드시 그 이유가 존재해야 한다. 만약 제어 흐름을 위해 예외를 사용하는 것이라면 이는 예외라는 것의 처리 목적과 전혀 부합하지 않게된다.
+- 예외는 반드시(항상) 체이닝하세요. 
+절대 원래 예외를 무시하지 말고 체이닝하여 낮은 수준의 근본 원인을 소프트웨어의 상위 레이어로 이동시킬 수 있게 된다. 또한, 문제에 대한 가치 있는 정보를 포함하기 때문에 빠르게 실수에 대응할 수 있게 된다.
+- 예외는 복구가 될 수 있다. 하지만, 무분별한 예외 복구보다는 분명한 이유가 있는 예외 복구와 진입로/출구로 가는 접점에 이를 배치하는 것이 좀 더 효율적이라고 할 수 있다.
+```java
+public static void main(String[] args) {
+	try {
+		System.out.println(new App().run())
+	} catch(Exception ex) {
+		System.err.println("죄송하지만 문제가 발생했어요:" + ex.getLocalizedMessage() )
+	}
+}
+```
+- main에서 예외를 잡지 않게 되면 런타임 환경으로 예외가 전달되고 결국 JVM이 이를 처리하게 될 것이다. 이는 곧 사용자에게 노출을 시키지 말아야 할 메세지를 노출하게 될수도 있다. 위와 같은 장소가 예외를 복구하기 좋은 장소라고 할 수 있다.
+
 ### 4.3 final이거나 abstract이거나
 ### 4.4 RAII를 사용하세요
 
