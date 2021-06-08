@@ -9,3 +9,6 @@
 > [RequestParamMethodArgumentResolver.resolveNamedValue](https://github.com/spring-projects/spring-framework/blob/f0f450a18dec7639ce8b967ed26c78cf777d4f7e/spring-webflux/src/main/java/org/springframework/web/reactive/result/method/annotation/RequestParamMethodArgumentResolver.java#L101)을 살펴보면 간단하게 로직 확인이 가능하다.
 
 - MVC에서처럼 querystring, form-data, multipart 모두 값을 받으려면 `@ModelAttribute`를 이용해야 한다.
+
+## 참고
+- [RequestParam (Spring Framework 5.3.7 API)](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/bind/annotation/RequestParam.html)

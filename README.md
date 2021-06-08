@@ -7,7 +7,7 @@
 - [@JsonView와 @JsonFilter를 사용하여 Partial response 구현하기](./JVM/SPRING/MVC/PartialReseponse.md)
 - [Mapstruct](./JVM/SPRING/mapStruct.md)
 - [Spring-Boot Logging And ELK Logstash Format](./JVM/SPRING/logback.md)
-
+- [MVC와 WebFlux에서의 @ReqeustParam](./JVM/SPRING/MVC/RequestParam.md)
 
 ### Java
 - [Effective-Java-3판-2장](./JVM/EffectiveJava3e/ch2.md)
