@@ -69,6 +69,9 @@
 ### AWS
 - [S3 + CloudFront + Route53 + Vuepress + Gulp을 활용한 SPA 어플리케이션 배포](./AWS/cloudfront_s3_route53_staticweb.md)
 
+### CS
+- [한 권으로 읽는 컴퓨터 구조와 프로그래밍](./CS/한권으로읽는컴퓨터구조와프로그래밍.md)
+
 
 ### 개발일기
 - [20190206(DEPRECATED)](./DIARY/20190206(DEPRECATED).md)
