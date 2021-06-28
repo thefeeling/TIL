@@ -28,6 +28,103 @@
 
 - 네티의 핵심 컴포넌트
   - Channel
+  하나 이상의 입출력 작업(읽기/쓰기)을 수행할수 있는 하드웨어 장치/파일/네트워크 소켓/프로그램 컴포넌트와 같은 엔티티에 대한 열린 연결, 들어오는 Inbound와 나가는 Outbound를 위한 운송수단으로 생각하자
   - Callback
+  콜백은 관심 대상에게 작업 완료를 알리는 가장 일반적인 방법으로 네티는 이벤트를 처리할 때 내부적으로 콜백을 이용한다. 콜백 트리거가 되면 ChannelHandler 인터페이스 구현을 통해 이벤트를 처리할수 있다.
   - Future
-  - 이벤트와 핸들러
+  퓨처는 작업이 완료되면 어플리케이션에 이를 알리는 방법이다. 비동기 작업의 결과를 접근할 수 있게 해준다. JDK에서는 java.`util.concurrent.Future` 인터페이스를 제공하지만, 해당 구현은 `작업 완료 여부 확인`과 `완료전까지 블록킹`하는 기능만 존재한다. 네티는 이를 개선한 `ChannelFuture`를 사용한다. ChannelFuture에는 ChannelFutureListener 인스턴스를 하나 이상 등록할 수 있으며 완료시점에 operationComplete() 콜백 메소드가 호출이 된다. 해당 콜백 실행 시점에 완료/오류 등을 확인 가능하다.
+  네티의 모든 아웃바운드 입출력은 ChannelFuture를 반환하고 진행에 블로킹 작업은 없다. 모든것은 비동기에 이벤트 기반이다.
+
+- 이벤트와 핸들러
+네티는 작업 상태 변화를 알리기 위해 고유한 이벤트를 사용한다. `로깅`, `데이터 변환`, `흐름 제어`, `어플리케이션 논리` 등의 동작을 포함한다. 이벤트들은 크게 `인바운드`와 `아웃바운드` 데이터 흐름의 연관성을 기준으로 분류한다.
+모든 이벤트는 핸들러 클래스의 사용자 구현 메서드로 전달할 수 있다. **다시 말해, 각 핸들러 인스턴스는 특정 이벤트에 반응하여 실행하는 일종의 콜백이라고 이해하면 된다.**
+> * 인바운드: 연결 활성화/비활성화, 데이터 읽기, 사용자 이벤트, 오류 이벤트
+> * 아웃바운드: 원격 피어 연결 열기/닫기, 소켓에 데이터 쓰기/플러시
+
+
+
+## 2장. 첫 번째 네티 어플리케이션
+- 책의 경우 maven 기준으로 설명을 하고 있지만, 예제는 gradle 기반의 프로젝트에서 작성했으며, `4.1.65.Final` 버젼을 기준으로 실습 편의성을 위해 `netty-all` 디펜던시를 참조했다.
+```
+dependencies {
+  implementation 'io.netty:netty-all:4.1.65.Final'
+  ...
+}
+```
+
+#### EchoServer 코드 작성
+  - 아래 `EchoServer` 및 `EchoServerHandler` 코드 작성 후 기동 
+  - telnet을 통하여 Echo 메세지가 다시 telnet 클라이언트로 다시 전달이 되는지 확인하면 서버 코드 작성은 완료
+```java
+public class EchoServer {
+private final int port;
+
+public EchoServer(int port) {
+	this.port = port;
+}
+
+public static void main(String[] args) throws InterruptedException {
+	if (args.length < 1) {
+		System.err.println("Usage: " + EchoServer.class.getSimpleName() + "<port>");
+	}
+	int port = Integer.parseInt(args[0]);
+	new EchoServer(port).start();
+}
+
+public void start() throws InterruptedException {
+	final EchoServerHandler echoServerHandler = new EchoServerHandler();
+	EventLoopGroup group = new NioEventLoopGroup();
+	try {
+		ServerBootstrap b = new ServerBootstrap();
+		b.group(group)
+			.channel(NioServerSocketChannel.class)
+			.localAddress(new InetSocketAddress(port))
+			.childHandler(new ChannelInitializer<SocketChannel>() {
+				@Override
+				protected void initChannel(SocketChannel ch) throws Exception {
+				System.out.println("initChannel");
+				ch.pipeline().addLast(echoServerHandler);
+				}
+			});
+		ChannelFuture future = b.bind().sync();
+		future.channel().closeFuture().sync();
+	} finally {
+		group.shutdownGracefully().sync();
+	}
+}
+}
+```
+
+```java
+@Sharable
+public class EchoServerHandler extends ChannelInboundHandlerAdapter {
+@Override
+public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+	final ByteBuf in = (ByteBuf) msg;
+	System.out.println(
+		"Server received: " + in.toString(CharsetUtil.UTF_8)
+	);
+	ctx.write(in);
+}
+
+@Override
+public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+	ctx.writeAndFlush(Unpooled.EMPTY_BUFFER)
+		.addListener(ChannelFutureListener.CLOSE);
+}
+
+@Override
+public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+	cause.printStackTrace();
+	ctx.close();
+}
+}
+```
+
+![텔넷테스트](https://i.imgur.com/jvDaSSu.png)
+
+#### EchoClient 코드 작성
+```java
+```
+```java
+```
