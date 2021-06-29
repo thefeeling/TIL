@@ -53,8 +53,7 @@ dependencies {
 ```
 
 #### EchoServer 코드 작성
-  - 아래 `EchoServer` 및 `EchoServerHandler` 코드 작성 후 기동 
-  - telnet을 통하여 Echo 메세지가 다시 telnet 클라이언트로 다시 전달이 되는지 확인하면 서버 코드 작성은 완료
+- 아래 `EchoServer` 및 `EchoServerHandler` 코드 작성 후 기동 
 ```java
 public class EchoServer {
 private final int port;
@@ -94,6 +93,7 @@ public void start() throws InterruptedException {
 }
 }
 ```
+- 부트스트랩 하는 코드를 포함하고 있으며, 서버 연결 요청을 수신하는 포트를 서버와 바인딩하는 코드가 있어야 한다.
 
 ```java
 @Sharable
@@ -121,7 +121,13 @@ public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws E
 }
 ```
 
+- telnet을 통하여 Echo 메세지가 다시 telnet 클라이언트로 다시 전달이 되는지 확인하면 서버 코드 작성은 완료
 ![텔넷테스트](https://i.imgur.com/jvDaSSu.png)
+- 서버에 들어오는 이벤트에 반응해야 하기 때문에 `ChannelInboundHandler` 구현체인 `ChannelInboundHandlerAdapter` 하위 클래스를 만들었고, 여기에 몇개 메소드를 오버라이드하여 메세지를 처리하도록 했다.
+  - `channelRead`: 메세지가 들어올때마다 호출
+  - `channelReadComplete`: channelRead()의 마지막 호출에서 현재 일괄 처리의 마지막 메세지를 처리했음을 핸들러에 통보
+  - `exceptionCaught`: 읽기 처리 중 예외가 발생하면 콜백됨, 예외 처리를 하지 않을 경우 ChannelPipeline의 마지막까지 이동 후 로깅이 되며, 가급적이면 하나 이상의 exceptionCaught를 구현하는 것이 바람직하다고 한다.
+- ChannelHandler는 네 가지 이벤트 유형을 제공하며, 어플리케이션은 ChannelHandler을 구현하거나 확장하여 이벤트를 후크하고 어플리케이션 로직을 제공해야 한다. ChannelHandler는 비즈니스 관심사에서 네트워크 관심사를 분리하는 것을 도와준다.
 
 #### EchoClient 코드 작성
 ```java
