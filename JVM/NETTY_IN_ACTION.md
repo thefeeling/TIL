@@ -1,4 +1,7 @@
-# Netty-In-Action
+Netty-In-Action
+----
+
+# 1부, 네티 개념과 아키텍처
 
 ## 1장. 네티: 비동기 이벤트 기반 네트워킹 프레임워크
 - 최초 자바 API(java.net)은 네이티브 시스템 소켓 라이브러리가 제공하는 블로킹 함수만 제공
@@ -56,47 +59,51 @@ dependencies {
 - 아래 `EchoServer` 및 `EchoServerHandler` 코드 작성 후 기동 
 ```java
 public class EchoServer {
-private final int port;
+	private final int port;
 
-public EchoServer(int port) {
-	this.port = port;
-}
-
-public static void main(String[] args) throws InterruptedException {
-	if (args.length < 1) {
-		System.err.println("Usage: " + EchoServer.class.getSimpleName() + "<port>");
+	public EchoServer(int port) {
+		this.port = port;
 	}
-	int port = Integer.parseInt(args[0]);
-	new EchoServer(port).start();
-}
 
-public void start() throws InterruptedException {
-	final EchoServerHandler echoServerHandler = new EchoServerHandler();
-	EventLoopGroup group = new NioEventLoopGroup();
-	try {
-		ServerBootstrap b = new ServerBootstrap();
-		b.group(group)
-			.channel(NioServerSocketChannel.class)
-			.localAddress(new InetSocketAddress(port))
-			.childHandler(new ChannelInitializer<SocketChannel>() {
-				@Override
-				protected void initChannel(SocketChannel ch) throws Exception {
-				System.out.println("initChannel");
-				ch.pipeline().addLast(echoServerHandler);
-				}
-			});
-		ChannelFuture future = b.bind().sync();
-		future.channel().closeFuture().sync();
-	} finally {
-		group.shutdownGracefully().sync();
+	public static void main(String[] args) throws InterruptedException {
+		if (args.length < 1) {
+			System.err.println("Usage: " + EchoServer.class.getSimpleName() + "<port>");
+		}
+		int port = Integer.parseInt(args[0]);
+		new EchoServer(port).start();
 	}
-}
+
+	public void start() throws InterruptedException {
+		final EchoServerHandler echoServerHandler = new EchoServerHandler();
+		EventLoopGroup group = new NioEventLoopGroup();
+		try {
+			ServerBootstrap b = new ServerBootstrap();
+			b.group(group)
+				.channel(NioServerSocketChannel.class)
+				.localAddress(new InetSocketAddress(port))
+				.childHandler(new ChannelInitializer<SocketChannel>() {
+					@Override
+					protected void initChannel(SocketChannel ch) throws Exception {
+						System.out.println("initChannel");
+						ch.pipeline().addLast(echoServerHandler);
+					}
+				});
+			ChannelFuture future = b.bind().sync();
+			future.channel().closeFuture().sync();
+		} finally {
+			group.shutdownGracefully().sync();
+		}
+	}
 }
 ```
 - 부트스트랩 하는 코드를 포함하고 있으며, 서버 연결 요청을 수신하는 포트를 서버와 바인딩하는 코드가 있어야 한다.
+- NioEventLoopGroup을 통하여 새로운 연결 수락 및 데이터 읽기/쓰기와 같은 이벤트를 처리
+- 서버가 바인딩하는 InetSocketAddress를 지정
+- 새로운 연결을 수락하고 Channel을 생성 후 ChannelInitializer를 통하여 EchoServerHandler 인스턴스를 Channel의 ChannelPipeline으로 추가한다.
+- ServerBootstrap.bind() 호출하여 서버를 바인딩
 
 ```java
-@Sharable
+@Sharable // 여러 Channel에서 공유할 수 있음을 나타나는 마커 인터페이스 
 public class EchoServerHandler extends ChannelInboundHandlerAdapter {
 @Override
 public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -130,7 +137,107 @@ public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws E
 - ChannelHandler는 네 가지 이벤트 유형을 제공하며, 어플리케이션은 ChannelHandler을 구현하거나 확장하여 이벤트를 후크하고 어플리케이션 로직을 제공해야 한다. ChannelHandler는 비즈니스 관심사에서 네트워크 관심사를 분리하는 것을 도와준다.
 
 #### EchoClient 코드 작성
+- 어플리케이션에서 필요한 `EchoClient`, `EchoClientHandler` 핸들러 코드는 아래와 같다.
+
 ```java
+@Sharable
+public class EchoClientHandler extends SimpleChannelInboundHandler<ByteBuf> {
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        ctx.writeAndFlush(
+		Unpooled.copiedBuffer("Netty rocks!", CharsetUtil.UTF_8)
+        );
+    }
+
+    @Override
+    protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
+        System.out.println(
+                "Client received: " + msg.toString(CharsetUtil.UTF_8)
+        );
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        cause.printStackTrace();
+        ctx.close();
+    }
+}
 ```
+
+![ChannelHandler_Hierachy](https://i.imgur.com/VrnfrIE.png)
+- 서버와 마찬가지로 EchoClientHandler는 `ChannelInboundHandler` 인터페이스의 구현체인 `SimpleChannelInboundHandler`의 메소드를 오버라이드하여 필요한 작업을 처리한다.
+  - `channelActive()`: 서버 연결 후 콜백
+  - `channelRead0()`: 서버에서 메세지 수신 후 콜백
+  - `exceptionCaught()`: 처리 중 예외 시 콜백
+- `channelRead0()`에서 주의할 점은 전체 바이트 데이터 수신를 한 번에 수신한다는 보장이 없다. 경우에 따라 `channelRead0()` 메소드가 여러번 호출될 수 있다. 대신, TCP는 스트림 기반 프로토콜이므로 서버에서 보낸 순서대로 바이트 수신을 보장한다.
+  > 예시) AB|CDE|FG, ABC|DE|FG, AB|CD|EFG 와 같은 형태로 바이트를 수신할 수도 있다는 이야기이다.
+
 ```java
+public class EchoClient {
+    private final String host;
+    private final int port;
+
+    public EchoClient(String host, int port) {
+        this.port = port;
+        this.host = host;
+    }
+
+    public void start() throws InterruptedException {
+        EventLoopGroup group = new NioEventLoopGroup();
+        try {
+            Bootstrap b = new Bootstrap();
+            b.group(group)
+                    .channel(NioSocketChannel.class)
+                    .remoteAddress(new InetSocketAddress(host, port))
+                    .handler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel ch) throws Exception {
+                            ch.pipeline()
+				    	.addLast(new EchoClientHandler());
+                        }
+                    });
+            ChannelFuture f = b.connect().sync();
+            f.channel().closeFuture().sync();
+        } finally {
+            group.shutdownGracefully().sync();
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        if (args.length < 1) {
+            System.err.println(
+                    "Usage: " + EchoClient.class.getSimpleName() + "<host> <port>"
+            );
+        }
+        String host = args[0];
+        int port = Integer.parseInt(args[1]);
+        new EchoClient(host, port).start();
+    }
+}
 ```
+
+## 3장. 네티 컴포넌트와 설계
+#### Channel, EventLoop, ChannelFuture
+- Channel: Socket
+- EventLoop: 제어 흐름, 멀티스레딩, 동시성 제어
+- ChannelFuture: 비동기 결과 알림
+
+#### Channel 인터페이스
+![Channel_Hierachy](https://i.imgur.com/Ovv6kg2.png)
+> 실제 구현 클래스와 인터페이스 종류는 더 다양하다.
+- `Channel` 인터페이스는 Socket으로 직접 작업할 때의 복잡성을 크게 완화하는 API를 제공
+
+#### EventLoop 인터페이스
+![EventLoop](https://i.imgur.com/rF7huZs.png)
+- 연결 수명주기 중 발생하는 이벤트를 처리하는 핵심 추상화 인터페이스
+
+![EventLoop](https://drek4537l1klr.cloudfront.net/maurer/Figures/03fig01.jpg)
+> 출처: Netty-In-Action
+
+- `Channel` - `EventLoop` - `Thread` - `EventLoopGroup` 사이에서의 상호작용은 아래와 같다
+  - 한 `EventLoopGroup`은 하나 이상의 EventLoop를 포함
+  - 한 `EventLoop`는 수명주기 동안 하나의 스레드에 바인딩
+  - 한 `EventLoop`에서 처리되는 모든 입출력은 전용 스레드에서 처리
+  - 한 `Channel`은 수명주기 동안 EventLoop에 등록
+  - 한 `EventLoop`는 하나 이상의 Channel로 할당 가능
+
