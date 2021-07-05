@@ -217,7 +217,7 @@ public class EchoClient {
 ```
 
 ## 3장. 네티 컴포넌트와 설계
-#### Channel, EventLoop, ChannelFuture
+### Channel, EventLoop, ChannelFuture
 - Channel: Socket
 - EventLoop: 제어 흐름, 멀티스레딩, 동시성 제어
 - ChannelFuture: 비동기 결과 알림
@@ -241,3 +241,38 @@ public class EchoClient {
   - 한 `Channel`은 수명주기 동안 EventLoop에 등록
   - 한 `EventLoop`는 하나 이상의 Channel로 할당 가능
 
+#### ChannelHandler와 ChannelPipeline
+![ChannelHandler](https://drek4537l1klr.cloudfront.net/maurer/Figures/03fig02.jpg)
+- `ChannelHandler` 인터페이스
+네티의 핵심 컴포넌트로 인바운드와 아웃바운드 데이터의 처리에 적용되는 모든 어플리케이션 논리를 처리하는 컨테이너 역할을 수행. 네트워크 이벤트에 의해 트리거되며 데이터를 변환하거나 예외처리하는 등의 모든 종류의 작업에 활용 가능하다.
+
+![ChannelPipeline](https://drek4537l1klr.cloudfront.net/maurer/Figures/03fig03_alt.jpg)
+- `ChannelPipeline` 인터페이스
+  - `ChannelPipeline`은 `ChannelHandler` 체인을 위한 컨테이너를 제공.
+  - 체인에서 인바운드/아웃바운드 이벤트를 전파하는 API를 정의한다.
+  - `ChannelHandler`는 아래와 같은 과정으로 `ChannelPipeline`에 설치
+    - `ChannelInitializer` 구현은 ServerBootstrap에 등록
+    - `ChannelInitializer.initChannel()`을 호출하면 ChannelInitializer가 ChannelHandler의 커스텀 집합을 파이프라인에 설치
+    - `ChannelInitializer`는 `ChannelPipeline`에서 자신을 제거
+  - 파이프라인을 통해 이벤트를 전달하는 역할은 `ChannelHandler`가 담당하며, 핸들러 객체는 이벤트를 수신하고 로직을 실행하며 체인상의 다음 핸들러로 데이터를 전달한다.
+  - 위 이미지에서 볼수 있듯이 인바운드/아웃바운드 핸들러는 같은 파이프라인에 설치가 가능하며 메세지/이벤트를 읽을 떄는 파이프라인 앞쪽에서 시작하며 체인상의 다음 ChannelInboundHandler로 데이터를 전달한다. 최종적으로 데이터가 파이프라인 뒤쪽에 이르면 모든 처리가 종료된다.
+  - 아웃바운드도 개념은 동일하며, 체인상에서 뒤쪽에서 시작하여 앞쪽에 이를 때까지 이동한다. Socket으로 나오는 부분에 도달하면 쓰기 작업이 트리거된다.
+  - 인바운드/아웃바운드 모두 ChannelHandler를 확장하지만, ChannelInboundHandler와 ChannelOutboundHandler의 구현을 구분하여 데이터 전달이 동일한 방향으로 수행되도록 보장한다.
+  - ChannelHandler를 하나 추가할 때 ChannelHandler와 ChannelPipeline의 바인딩을 나타내는 ChannelHandlerContext 하나가 할당된다. 
+  - 네티에서는 메세지를 보내는 데 Channel에 직접할 기록하는 방법과 ChannelHandler와 연결된 ChannelHandlerContext 객체에 기록하는 두 가지 방법이 존재한다. 전자는 ChannelPipeline 뒤쪽에서 시작되며, 후자의 방법은 메세지가 ChannelPipeline의 다음 핸들러에서 시작된다.
+
+#### ChannelHandler에 대한 고찰
+- 네티는 비즈니스 로직을 쉽게 개발할 수 있도록 어댑터 클래스의 형태로 여러 기본 핸들러를 제공
+- 파이프라인의 각 핸들러는 체인의 다음 핸들러로 전달해야 하는데, 어댑터 클래스는 이 작업을 자동으로 해주고 특수한 동작이 필요한 메서드와 이벤트만 재정의할 수 있다.
+- 가장 자주 사용할 어댑터는 아래와 같다
+  - `ChannelHandlerAdapter`
+  - `ChannelInboundHandlerAdapter`
+  - `ChannelOutboundHandlerAdapter`
+  - `ChannelDuplexHandlerAdapter`
+
+#### 인코더/디코더
+- 메세지를 전송/수신할 때는 데이터를 변환해야 한다. 인바운드 메세지를 바이트에서 다른 포맷(보통 객체)로 변환하는 `디코딩` 과정을 거친다. 아웃바운드 메세지를 반대로 현재 포맷에서 바이트로 `인코딩` 되는 과정을 거친다. 
+- 두 가지 변환 과정이 필요한 이유는 네트워크 데이터는 연속된 바이트여야하기 때문이다.
+- 네티가 제공하는 인코더/디코더 어댑터 클래스는 ChannelInboundHandler와 ChannelOutboundHandler를 구현한다.
+  - 인바운드 데이터의 경우 인바운드 Channel에서 읽는 각 메세지에 대해 호출되는 channelRead 메세지/이벤트를 재정의한다. 이 메서드는 제공된 디코더의 decode() 메서드를 호출한 후 디코딩된 바이트를 파이프라인 다음 ChannelInboundHandler에 전달한다. 
+  - 아웃바운드 메세지를 위한 패턴은 반대이며 인코더가 메세지를 바이트로 변환한 후 다음 ChannelOutboundHandler로 전달한다.
