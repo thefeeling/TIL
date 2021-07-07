@@ -276,3 +276,23 @@ public class EchoClient {
 - 네티가 제공하는 인코더/디코더 어댑터 클래스는 ChannelInboundHandler와 ChannelOutboundHandler를 구현한다.
   - 인바운드 데이터의 경우 인바운드 Channel에서 읽는 각 메세지에 대해 호출되는 channelRead 메세지/이벤트를 재정의한다. 이 메서드는 제공된 디코더의 decode() 메서드를 호출한 후 디코딩된 바이트를 파이프라인 다음 ChannelInboundHandler에 전달한다. 
   - 아웃바운드 메세지를 위한 패턴은 반대이며 인코더가 메세지를 바이트로 변환한 후 다음 ChannelOutboundHandler로 전달한다.
+
+
+#### SimpleChannelInboundHandler 추상 클래스
+- 어플리케이션에서 들어오는 디코딩된 메세지를 수신하고 데이터에 비즈니스 논리를 적용하는 핸들러를 많이 사용하게 되는데 이러한 핸들러를 만들때 `SimpleChannelInboundHandler<T>`를 확장하면 되며, T는 처리하는 메세지의 제네릭 타입이다. 하나 이상의 메소드를 오버라이드하고 모든 핸들러 매서드에 인자로 전달되는 ChannelHandlerContext에 대한 참조를 얻는다.
+- 이 메소드에서 가장 중요한 메소드는 `channelRead0(ChannelHandlerContext T)`인데, 원하는대로 구현을 가능하지만 현재 입출력 스레드를 블로킹하지 않아야 한다는 요건이 있다.
+
+### 부트스트랩
+- 네티의 부트스트랩 클래스는 프로세스를 지정 포트에 바인딩(서버 부트스트랩)하거나 프로세스를 지정된 호스트의 지정된 포트에서 실행 중인 다른 호스트로 연결(클라이언트 부트스트랩)하는 등의 일을 하는 네트워크 레이어를 구성하는 컨테이너를 제공한다.
+
+| 범주 | Bootstrap | ServerBootstrap |
+|----------|:----------|:-------------:|
+| 네트워크 기능 | 원격 호스트/포트와 연결 |  로컬 포트로 바인딩 |
+| EventLoopGroup | 1 |  2 |
+
+- Bootstrap과 ServerBootstrap은 각기 EventLoopGroup의 수가 다른걸 볼 수 있다. 
+
+![ServerBootstrap_EventLoopGroup](https://drek4537l1klr.cloudfront.net/maurer/Figures/03fig04_alt.jpg)
+
+- 서버의 경우, 첫 번째 집합은 로컬 포트와 바인됭 서버 자체의 수신 소켓을 나타내는 ServerChannel 하나를 포함하고 두 번째 집합은 서버가 수락한 연결마다 하나씩 들어오는 클라이언트 연결을 처리하기 위해 생성된 모든 Channel을 포함한다.
+- ServerChannel과 연결된 EventLoopGroup은 들어오는 연결 요청에 대해 Channel을 생성하는 역할을 EventLoop 하나에 할당한다. 연결이 수락되면 두 번째 EventLoopGroup이 해당 Channel에 EventLoop를 할당한다.
