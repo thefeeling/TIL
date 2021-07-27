@@ -1,5 +1,5 @@
 # JPA Insert 성능 올려보기
-JPA를 사용하다보면, 불필요하게 발생하는 쿼리를 종종 볼수 있다. 물론 도메인의 상황이 select 쿼리가 반드시 필요한 상황이라면 문제가 되지 않겠지만, 경우에 따라서 insert 쿼리만 발생하도록 하는 것이 최선일 경우도 있다. 실제 업무에서 불필요하게 발생하는 select 쿼리로 인해 DBA분들에게 문의를 받기로 해서 이에 관련된 부분을 해결(?)하고자 이것저것 찾아본 내용을 정리하려고 한다.
+JPA를 사용하다보면, 불필요하게 발생하는 쿼리를 종종 볼수 있다. 물론 도메인 상황이 select 쿼리가 반드시 필요한 상황이라면 문제가 되지 않겠지만, 경우에 따라서 insert 쿼리만 발생하도록 하는 것이 최선일 경우도 있다. 실제 업무에서 불필요하게 발생하는 select 쿼리로 인해 DBA분들에게 문의를 받기로 해서 이에 관련된 부분을 해결(?)하고자 이것저것 찾아본 내용을 정리하려고 한다.
 
 ### Persistable 인터페이스 구현
 Data JPA 문서를 살펴보면 `Persistable`이라는 인터페이스를 언급한 부분이 있다. 인터페이스 코드를 살펴보면 간단하게 엔티티의 상태를 표현할 수 있으며, 이에 따라 실제 JpaRepository의 구현 클래스인 `SimpleJpaRepository`에서 isNew 상태를 판단하여 불필요한 Select를 줄이고 바로 Insert문을 실행할 수 있게 된다. 간단한 엔티티 구현 코드를 아래와 같다.
@@ -143,8 +143,8 @@ class UserAccessLogProcessor(
                 .bufferTimeout(30, Duration.ofSeconds(5))
                 .delaySequence(Duration.ofMillis(100))
                 .limitRate(2)
-                .parallel(20)
-                .runOn(Schedulers.boundedElastic())
+                .parallel(32)
+                .runOn(Schedulers.parallel())
                 .doOnNext {
                     logger.info("items = {}", it)
                 }

@@ -56,7 +56,8 @@ dependencies {
 ```
 
 #### EchoServer 코드 작성
-- 아래 `EchoServer` 및 `EchoServerHandler` 코드 작성 후 기동 
+- 아래 `EchoServer` 및 `EchoServerHandler` 코드 작성 후 기동
+
 ```java
 public class EchoServer {
 	private final int port;
@@ -296,3 +297,8 @@ public class EchoClient {
 
 - 서버의 경우, 첫 번째 집합은 로컬 포트와 바인됭 서버 자체의 수신 소켓을 나타내는 ServerChannel 하나를 포함하고 두 번째 집합은 서버가 수락한 연결마다 하나씩 들어오는 클라이언트 연결을 처리하기 위해 생성된 모든 Channel을 포함한다.
 - ServerChannel과 연결된 EventLoopGroup은 들어오는 연결 요청에 대해 Channel을 생성하는 역할을 EventLoop 하나에 할당한다. 연결이 수락되면 두 번째 EventLoopGroup이 해당 Channel에 EventLoop를 할당한다.
+
+
+## 4장 전송
+- 네티는 모든 전송 구현에 공통 API를 기반으로 사용하기 때문에 JDK를 직접 이용할 떄보다 변환이 훨씬 간단하다.
+  - 코드가 세부 구현 사항으로 오염될 우려가 적고, 광범위한 범위를 수정할 필요가 없어진다.
