@@ -7,11 +7,6 @@
       v-if="shouldShowNavbar"
     />
 
-    <!-- <div
-      class="sidebar-mask"
-      @click="toggleSidebar(false)"
-    /> -->
-
     <Sidebar
       :items="sidebarItems"
       v-if="shouldShowSidebar"

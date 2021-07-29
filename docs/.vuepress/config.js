@@ -74,7 +74,7 @@ module.exports = {
   displayAllHeaders: true,
   docsDir: 'docs',
   title: "Choi's Dev",
-  description: 'Just playing around',
+  description: 'Software Engineer, Backend-Developer',
   configureWebpack,
   markdown,
   theme: 'antdocs',
