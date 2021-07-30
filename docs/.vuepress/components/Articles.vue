@@ -16,16 +16,8 @@ import * as R from 'ramda';
 
 export default {
   name: 'Articles',
-
-  components: {},
-
   data() {
     return {};
-  },
-  methods:{
-
-  },
-  mounted() {
   },
   computed: {
     pages() {
