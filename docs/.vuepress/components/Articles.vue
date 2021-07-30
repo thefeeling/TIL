@@ -1,9 +1,9 @@
 <template>
   <div>
-      <template v-for="(item, index) in this.pages">
-        <h3 v-bind:key="index">{{ item.yyyyMMdd }}</h3>
-        <a-anchor v-for="(page, index) in item.body" :affix="false" v-bind:key="index">
-          <a-anchor-link v-bind:key="key" v-bind:href="page.path" v-bind:title="page.title" />
+      <template v-for="(item) in this.pages">
+        <h3 v-bind:key="item.yyyyMMdd">{{ item.yyyyMMdd }}</h3>
+        <a-anchor v-for="(page, index, key) in item.body" :affix="false" v-bind:key="key">
+          <a-anchor-link v-bind:href="page.path" v-bind:title="page.title" />
         </a-anchor>
       </template>
   </div>
@@ -66,7 +66,6 @@ export default {
           return '2021-01-01'
         }
       })(list);
-      debugger;
       return Object.keys(result)
       .sort(o => o[0] < o[1])
       .map(o => {

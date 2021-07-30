@@ -91,7 +91,7 @@ module.exports = {
   markdown,
   theme: 'antdocs',
   themeConfig: {
-    lastUpdated: 'Last Updated',
+    // lastUpdated: 'Last Updated',
     smoothScroll: true,
     nav: [
       { text: 'Home', link: '/' },
@@ -99,7 +99,11 @@ module.exports = {
     ],
     sidebar: getSidebarArr(),
   },
+  head: [
+    // ['meta', { name: "theme-color", content: "#ffffff"}],
+  ],  
   plugins: [
+    ['@vuepress/last-updated'],
     'vuepress-plugin-mermaidjs',
     ["sitemap", { hostname: "https://thefeeling.github.io" }],
     [
