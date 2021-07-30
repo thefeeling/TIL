@@ -23,7 +23,6 @@ const docsPath = __dirname + "/../";
 
 function getSidebarArr() {
   const sidebarArr = [];
-  const HomeFilelist = [];
   const filelist = fs.readdirSync(docsPath);
   filelist.forEach(function(file) {
     if (file === ".vuepress") return;
@@ -35,13 +34,7 @@ function getSidebarArr() {
       const list = fs.readdirSync(docsFolderPath);
       sidebarArr.push(makeSidebarObject(file, list));
     } 
-    // else {
-    //   // NOT directory
-    //   // title is '/' children is file
-    //   HomeFilelist.push(file);
-    // }
   });
-  sidebarArr.unshift(makeSidebarObject("", HomeFilelist));
   console.error(sidebarArr)
   return sidebarArr;
 }
@@ -65,8 +58,6 @@ function makeSidebarObject(folder, mdfileList) {
     title = Number(folder.substr(0, dotIdx))
         ? folder.substr(dotIdx + 1)
         : folder;
-  } else {
-    title = "HOME";
   }
   return {
     title: title,

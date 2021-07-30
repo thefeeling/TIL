@@ -46,7 +46,7 @@ import { resolveSidebarItems } from 'vuepress-theme-antdocs/util'
 import Comment from "../Comment";
 
 export default {
-  name: 'Layout',
+  name: 'GlobalLayout',
 
   components: {
     Home,
