@@ -45,6 +45,7 @@ function getSidebarArr() {
   console.error(sidebarArr)
   return sidebarArr;
 }
+
 function makeSidebarObject(folder, mdfileList) {
   let title;
   const path = folder ? "/" + folder + "/" : "/";
