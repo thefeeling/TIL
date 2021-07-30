@@ -1,13 +1,12 @@
 <template>
-  <a-list item-layout="horizontal" :data-source="this.pages">
-    <a-list-item slot="renderItem" slot-scope="item, index">
-      <a-list-item-meta
-        description="Ant Design, a design language for background applications, is refined by Ant UED Team"
-      >
-        <a slot="title" href="https://www.antdv.com/">{{ item.title }}</a>
-      </a-list-item-meta>
-    </a-list-item>
-  </a-list>
+  <div>
+    <a-timeline>
+      <a-timeline-item v-for="(item, index) in this.pages" v-bind:key="index">
+        <div>{{ item.lastUpdated }}</div>
+        <a v-bind:href="item.path">{{ item.title }} </a>
+      </a-timeline-item>
+    </a-timeline>
+  </div>
 </template>
 
 <script>
@@ -17,9 +16,7 @@ export default {
   components: {},
 
   data() {
-    return { 
-      data
-    };
+    return {};
   },
   methods:{
 
@@ -28,8 +25,7 @@ export default {
   },
   computed: {
     pages() {
-      debugger;
-      return this.$root.$themeConfig.sidebar;
+      return this.$site.pages;
     },
   }
 }

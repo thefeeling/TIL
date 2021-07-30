@@ -66,9 +66,6 @@ function aheadOfReadme(arr) {
 }
 
 const sidebar = getSidebarArr()
-const postItems = sidebar.map((o) => {
-  return { text: o.title, link: o.children[0] };
-})
 
 module.exports = {
   displayAllHeaders: true,
@@ -83,11 +80,7 @@ module.exports = {
     smoothScroll: true,
     nav: [
       { text: 'Home', link: '/' },
-      {
-        text: 'Post', 
-        ariaLabel: 'Language Menu',
-        items: postItems,
-      },
+
     ],
     sidebar,
   },
