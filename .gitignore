@@ -1,6 +1,6 @@
 .DS_Store
 # -- repo --
-public
+/public
 
 # -- Node --
 # Logs

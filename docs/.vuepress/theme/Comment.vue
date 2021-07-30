@@ -13,7 +13,7 @@ export default {
 
     utterances.setAttribute("issue-term", "pathname");
     utterances.setAttribute("theme", "github-light");
-    utterances.setAttribute("repo", `thefeeling/TIL`);
+    utterances.setAttribute("repo", `thefeeling/thefeeling.github.io`);
 
     this.$refs.comment.appendChild(utterances);
   }

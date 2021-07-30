@@ -83,6 +83,7 @@ function aheadOfReadme(arr) {
 }
 
 module.exports = {
+  ga: 'G-9EB3LVE0E9',
   displayAllHeaders: true,
   docsDir: 'docs',
   title: "Choi's Dev",
@@ -100,6 +101,7 @@ module.exports = {
     sidebar: getSidebarArr(),
   },
   plugins: [
-    'vuepress-plugin-mermaidjs'
+    'vuepress-plugin-mermaidjs',
+    ["sitemap", { hostname: "https://thefeeling.github.io/" }],
   ],
 }
