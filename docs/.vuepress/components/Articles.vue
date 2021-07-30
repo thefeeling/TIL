@@ -31,16 +31,14 @@ export default {
         relativePath,
         title
       }) => {
-        let yyyyMMdd;
-        let hhMMss;
-        if (lastUpdated) {
-            const date = lastUpdated.split(",");
-            yyyyMMdd = moment(date[0], 'MM/DD/YYYY').format('YYYY-MM-DD');
-            hhMMss = date[1];
-        }
+        const date = moment(lastUpdated || '07/28/2021', "MM/DD/YYYY, LTS");
+        const yyyyMMdd = date.format('YYYY-MM-DD');
+        const hhMMss = date.format('hh:mm:ss');
+        const unix = date.unix();
         return {
           yyyyMMdd,
           hhMMss,
+          unix,
           frontmatter,
           headers,
           key,
@@ -51,23 +49,15 @@ export default {
           title,
         }
       });
-      const result = R.groupBy(o => {
-        if (o.yyyyMMdd) {
-          return o.yyyyMMdd
-        } else {
-          return '2021-01-01'
-        }
-      })(list);
+      const result = R.groupBy(o => o.yyyyMMdd)(list);
       return Object.keys(result)
-      .sort(o => o[0] < o[1])
-      .map(o => {
-        const rs = {
-          yyyyMMdd: o,
-          body: result[o],
-        };
-        console.log(rs);
-        return rs;
-      });
+      .sort((a, b) => (a > b) ? -1 : ((a < b) ? 1 : 0))
+      .map(o => ({
+        yyyyMMdd: o,
+        body: result[o].sort((a, b) => {
+          return (a.unix > b.unix) ? -1 : ((a.unix < b.unix) ? 1 : 0);
+        }),
+      }));
     },
   }
 }
