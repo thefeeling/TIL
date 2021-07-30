@@ -2,9 +2,9 @@
   <div>
       <template v-for="(item) in this.pages">
         <h3 v-bind:key="item.yyyyMMdd">{{ item.yyyyMMdd }}</h3>
-        <a-anchor v-for="(page, index, key) in item.body" :affix="false" v-bind:key="key">
-          <a-anchor-link v-bind:href="page.path" v-bind:title="page.title" />
-        </a-anchor>
+        <div v-for="(page, index, key) in item.body" :affix="false" v-bind:key="key">
+          <a v-bind:href="page.path">{{ page.title }}</a>
+        </div>
       </template>
   </div>
 </template>

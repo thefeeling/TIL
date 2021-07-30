@@ -80,7 +80,7 @@ module.exports = {
   description: 'Software Engineer, Backend-Developer',
   configureWebpack,
   markdown,
-  theme: 'antdocs',
+  
   themeConfig: {
     // lastUpdated: 'Last Updated',
     smoothScroll: true,
