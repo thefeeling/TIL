@@ -38,9 +38,16 @@ export default {
         relativePath,
         title
       }) => {
-        const date = moment(lastUpdated, "MM DD YYYY hh:mm:ss");
+        let yyyyMMdd;
+        let hhMMss;
+        if (lastUpdated) {
+            const date = lastUpdated.split(",");
+            yyyyMMdd = date[0];
+            hhMMss = date[1];
+        }
         return {
-          yyyyMMdd: date.format('YYYY-MM-DD'),
+          yyyyMMdd,
+          hhMMss,
           frontmatter,
           headers,
           key,
