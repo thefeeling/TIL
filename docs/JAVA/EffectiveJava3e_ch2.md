@@ -1,3 +1,5 @@
+# Effective Java - 2장
+
 # [2장] 모든 객체의 공통 메서드
 - Objects는 객체를 만들 수 있는 구체 클래스면서 기본적으로 상속하여 사용이 가능
 - equals, hashCode, toString, clone, finalize 모두 재정의를 염두로 두고 설계

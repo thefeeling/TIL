@@ -1,5 +1,4 @@
-Netty-In-Action
-----
+# Netty-In-Action
 
 # 1부, 네티 개념과 아키텍처
 

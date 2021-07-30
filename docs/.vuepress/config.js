@@ -4,9 +4,24 @@
 const configureWebpack = require('./webpack');
 const markdown = require('./markdown');
 const fs = require("fs");
+const docsPath = __dirname + "/../";
+
+
+// const markdownLinkExtractor = require('markdown-link-extractor');
+// const dirTree = require('directory-tree');
+// const debug = require('debug')
+// const { logger } = require('@vuepress/shared-utils')
+// const sidebar = () => {
+//   const data = dirTree(docsPath, {
+//     extensions: /\.md/,
+//     attributes:['mode', 'mtime']
+//   });
+//   logger.debug('data', data);
+//   return data.children;
+// }
+
 
 function getSidebarArr() {
-  const docsPath = __dirname + "/../";
   const sidebarArr = [];
   const HomeFilelist = [];
   const filelist = fs.readdirSync(docsPath);
@@ -19,11 +34,12 @@ function getSidebarArr() {
       const docsFolderPath = docsPath + "/" + file;
       const list = fs.readdirSync(docsFolderPath);
       sidebarArr.push(makeSidebarObject(file, list));
-    } else {
-      // NOT directory
-      // title is '/' children is file
-      HomeFilelist.push(file);
-    }
+    } 
+    // else {
+    //   // NOT directory
+    //   // title is '/' children is file
+    //   HomeFilelist.push(file);
+    // }
   });
   sidebarArr.unshift(makeSidebarObject("", HomeFilelist));
   console.error(sidebarArr)
@@ -65,8 +81,6 @@ function aheadOfReadme(arr) {
   return arr;
 }
 
-const sidebar = getSidebarArr()
-
 module.exports = {
   displayAllHeaders: true,
   docsDir: 'docs',
@@ -80,9 +94,9 @@ module.exports = {
     smoothScroll: true,
     nav: [
       { text: 'Home', link: '/' },
-
+      { text: 'Github', link: 'https://www.github.com/thefeeling' },
     ],
-    sidebar,
+    sidebar: getSidebarArr(),
   },
   plugins: [
     'vuepress-plugin-mermaidjs'

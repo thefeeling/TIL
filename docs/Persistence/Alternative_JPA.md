@@ -1,7 +1,7 @@
+# Alternatives to JPA
 
 같이 근무했던 시니어 개발자분께서 내용이 좋다면서 추천해주셔서 [링크](https://www.youtube.com/watch?v=2zQdmC0vnFU)를 통하여 동영상을 시청했다. 분량은 대충 1시간 가량 되는데, JPA를 사용하면서도 하이버네이트에 대한 충분한 학습을 하지 못해서 겪었던 지난 1년간의 많은 시행착오들이 생각이 났고, Kotlin을 메인으로 사용했을때의 다양한 선택지에 대해서 고민을 해볼 수 있었던거 같아서 매우 유익했다고 할 수 있다. 
 
-# Alternatives to JPA
 - 데이터를 표현하는 관점에 따라 달라 질 수 있다. 
   - Relational
   - OOP
