@@ -101,7 +101,7 @@ module.exports = {
   },
   plugins: [
     'vuepress-plugin-mermaidjs',
-    ["sitemap", { hostname: "https://thefeeling.github.io/" }],
+    ["sitemap", { hostname: "https://thefeeling.github.io" }],
     [
       '@vuepress/google-analytics',
       {
