@@ -24,7 +24,7 @@
     "moment": "^2.29.1",
     "ramda": "^0.27.1",
     "serve": "10.0.0",
-    "standard-version": "^4.4.0",
+    "standard-version": "^8.0.1",
     "vuepress": "^1.7.1",
     "vuepress-plugin-mermaidjs": "^1.8.1",
     "vuepress-plugin-sitemap": "^2.3.1",
