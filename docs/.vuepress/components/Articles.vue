@@ -61,10 +61,12 @@ export default {
       return Object.keys(result)
       .sort(o => o[0] < o[1])
       .map(o => {
-        return {
+        const rs = {
           yyyyMMdd: o,
           body: result[o],
-        }
+        };
+        console.log(rs);
+        return rs;
       });
     },
   }
