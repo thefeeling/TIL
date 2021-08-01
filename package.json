@@ -1,33 +1,34 @@
 {
-  "name": "ohyes-page",
-  "version": "0.0.1",
-  "description": "ohyes-page",
-  "author": "",
-  "license": "MIT",
+  "name": "hexo-site",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "start": "npm run build && npm run serve",
-    "dev1": "node --nolazy --inspect-brk=9229 ./node_modules/.bin/vuepress dev docs --debug",
-    "dev": "vuepress dev docs --debug",
-    "build": "vuepress build -d public docs",
-    "serve": "serve public"
+    "build": "hexo generate",
+    "clean": "hexo clean",
+    "deploy": "rm -rf public | hexo deploy",
+    "server": "hexo server"
   },
-  "devDependencies": {
-    "@vuepress/plugin-back-to-top": "^1.7.1",
-    "@vuepress/plugin-google-analytics": "^1.8.2",
-    "@vuepress/plugin-pwa": "^1.7.1",
-    "directory-tree": "^2.2.9",
-    "dotenv": "^6.0.0",
-    "image-data-uri": "^1.1.1",
-    "katex": "^0.10.0-alpha",
-    "markdown-it-texmath": "^0.4.7",
-    "markdown-link-extractor": "^1.3.0",
-    "moment": "^2.29.1",
-    "ramda": "^0.27.1",
-    "serve": "10.1.2",
-    "standard-version": "^8.0.1",
-    "vuepress": "^1.7.1",
-    "vuepress-plugin-mermaidjs": "^1.8.1",
-    "vuepress-plugin-sitemap": "^2.3.1",
-    "vuepress-theme-antdocs": "^1.3.5"
+  "hexo": {
+    "version": "5.4.0"
+  },
+  "dependencies": {
+    "hexo": "^5.0.0",
+    "hexo-browsersync": "^0.3.0",
+    "hexo-deployer-git": "^3.0.0",
+    "hexo-directory-category": "^1.1.4",
+    "hexo-filter-mermaid-diagrams": "^1.0.5",
+    "hexo-filter-plantuml": "^2.1.1",
+    "hexo-generator-category": "^1.0.0",
+    "hexo-generator-index": "^2.0.0",
+    "hexo-generator-robotstxt": "^0.2.0",
+    "hexo-generator-sitemap": "^2.1.0",
+    "hexo-generator-tag": "^1.0.0",
+    "hexo-renderer-ejs": "^1.0.0",
+    "hexo-renderer-marked": "^4.0.0",
+    "hexo-renderer-pug": "^2.0.0",
+    "hexo-renderer-sass": "^0.4.0",
+    "hexo-renderer-stylus": "^2.0.0",
+    "hexo-server": "^2.0.0",
+    "hexo-theme-landscape": "^0.0.3"
   }
 }
