@@ -51,12 +51,14 @@ I -> I : 구현 기술을 다루는 부분을 책임지며\nRDB, NoSQL 등 실�
 > - [Nextree, DIP](http://www.nextree.co.kr/p6960/)
 
 DIP를 적용하게 되면 아래와 같이 구현 기술과 관련된 종속성을 쉽게 제거할 수 있는데, 저수준의 모듈이 고수준의 모듈을 참조하도록 구성하는 방법. 즉 인터페이스를 참조하게 되면 실제 인터페이스의 구현 부분에서 사용하는 구현 기술이 어떤 종류의 것인지와 상관없이 도메인에서 필요한 기능 자체에만 집중한 표현이 가능하다.
+
 ```mermaid
 graph LR
 CalculateDiscountService --> RuleDiscounter
 RuleDiscounter --> RDB/JPA
 RuleDiscounter --> SearchEngine
-``` 
+```
+
 - 위 이미지에서 볼 수 있듯이 실제 구현이 RDB로 되어 있던지, 검색엔진을 통하여 되어 있던지 이는 중요하지 않고 실제 구현하고자 하는 `가격할인`이라는 목적에만 집중 할 수 있다. 
 - 인터페이스를 사용함에 따라 실제 테스트 코드 작성 시, 쉽게 목(Mock) 구현을 할 수 있으며 또한 구현 변경에 따른 부담이 줄게 될 것이다.
 
