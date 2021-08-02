@@ -1,6 +1,6 @@
 ---
 title: Effective Java - 3장
-date: 2021/7/28 00:00:00
+date: 2019.2.19. 23:00
 categories:
 - Java
 ---

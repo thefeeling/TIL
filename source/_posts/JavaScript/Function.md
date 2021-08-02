@@ -1,6 +1,6 @@
 ---
 title: 'JavaScript_this 바인딩(함수/객체)'
-date: 2021/7/28 00:00:00
+date: 2016/7/12 00:00:00
 categories:
 - JavaScript
 ---

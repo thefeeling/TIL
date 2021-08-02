@@ -1,8 +1,8 @@
 ---
 title: 멱등성과 HTTP에 대한 생각
-date: 2021/7/29 00:00:00
+date: 2020/2/5 00:00:00
 categories:
-- ARCHITECTURE
+- HTTP
 ---
 
 ## 멱등성과 HTTP에 대한 생각

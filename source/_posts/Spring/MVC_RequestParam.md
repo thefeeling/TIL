@@ -1,6 +1,6 @@
 ---
 title: 'MVC와 WebFlux에서의 @ReqeustParam'
-date: 2021/7/28 00:00:00
+date: 2021.7.27. 19:50
 categories:
 - Spring
 ---

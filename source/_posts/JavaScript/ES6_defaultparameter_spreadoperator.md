@@ -1,6 +1,6 @@
 ---
 title: '[ES6] default parameter / spread operator / rest parameter'
-date: 2021/7/28 00:00:00
+date: 2016/7/12 00:00:00
 categories:
 - JavaScript
 ---

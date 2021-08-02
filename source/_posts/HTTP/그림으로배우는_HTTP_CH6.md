@@ -1,6 +1,6 @@
 ---
 title: 그림으로배우는HTTP - 6. HTTP 헤더
-date: 2021/7/30 00:00:00
+date: 2020/2/5 00:00:00
 categories:
 - HTTP
 ---

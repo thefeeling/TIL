@@ -1,6 +1,6 @@
 ---
 title: 'Kotlin-In-Action Generics'
-date: 2021/7/28 00:00:00
+date: 2021.7.27. 19:44
 categories:
 - Kotlin
 ---

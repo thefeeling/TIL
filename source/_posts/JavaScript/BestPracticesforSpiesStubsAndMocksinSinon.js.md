@@ -1,6 +1,6 @@
 ---
 title: Best Practices for Spies, Stubs and Mocks in Sinon.js
-date: 2021/7/28 00:00:00
+date: 2016/7/12 00:00:00
 categories:
 - JavaScript
 ---

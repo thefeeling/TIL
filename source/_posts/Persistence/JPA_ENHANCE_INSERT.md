@@ -1,6 +1,6 @@
 ---
 title: 'JPA Insert 성능 올려보기'
-date: 2021/7/28 00:00:00
+date: 2020/8/12 00:00:00
 categories:
 - Persistence
 ---

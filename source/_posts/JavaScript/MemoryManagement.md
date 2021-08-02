@@ -1,6 +1,6 @@
 ---
 title: '자바스크립트의 메모리 관리'
-date: 2021/7/28 00:00:00
+date: 2016/7/12 00:00:00
 categories:
 - JavaScript
 ---

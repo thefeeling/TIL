@@ -1,6 +1,6 @@
 ---
 title: mapStruct
-date: 2021/7/28 00:00:00
+date: 2019.5.26. 20:58:00
 categories:
 - Java
 ---

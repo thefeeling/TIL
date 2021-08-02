@@ -1,6 +1,6 @@
 ---
 title: 'JavaScript_Prototype & Prototype Chainning'
-date: 2021/7/28 00:00:00
+date: 2016.7.17. 22:50
 categories:
 - JavaScript
 ---

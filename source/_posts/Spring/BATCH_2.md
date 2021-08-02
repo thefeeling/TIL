@@ -1,6 +1,6 @@
 ---
 title: '스프링 부트 배치 #2 - ItemReader'
-date: 2021/7/28 00:00:00
+date: 2019.1.4. 00:27
 categories:
 - Spring
 ---

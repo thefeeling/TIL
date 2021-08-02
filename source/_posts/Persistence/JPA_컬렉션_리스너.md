@@ -1,6 +1,6 @@
 ---
 title: 'JPA 컬렉션 & 리스너'
-date: 2021/7/28 00:00:00
+date: 2019.8.31. 20:09
 categories:
 - Persistence
 ---

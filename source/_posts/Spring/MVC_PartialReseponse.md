@@ -1,6 +1,6 @@
 ---
 title: '@JsonView와 @JsonFilter를 사용하여 Partial response 구현하기'
-date: 2021/7/28 00:00:00
+date: 2019.5.27. 09:33:00
 categories:
 - Spring
 ---

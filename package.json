@@ -5,7 +5,7 @@
   "scripts": {
     "build": "hexo generate",
     "clean": "hexo clean",
-    "deploy": "rm -rf public | hexo deploy",
+    "deploy": "rm -rf .deploy_git public | hexo deploy",
     "server": "hexo server"
   },
   "hexo": {
@@ -18,6 +18,7 @@
     "hexo-directory-category": "^1.1.4",
     "hexo-filter-mermaid-diagrams": "^1.0.5",
     "hexo-filter-plantuml": "^2.1.1",
+    "hexo-generator-archive": "^1.0.0",
     "hexo-generator-category": "^1.0.0",
     "hexo-generator-index": "^2.0.0",
     "hexo-generator-robotstxt": "^0.2.0",

@@ -74,3 +74,5 @@ typings/
 
 # Idea
 .idea
+
+.deploy_git/

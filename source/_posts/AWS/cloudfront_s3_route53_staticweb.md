@@ -1,6 +1,6 @@
 ---
 title: S3 + CloudFront + Route53 + Vuepress + Gulp을 활용한 SPA 어플리케이션 배포
-date: 2021/7/29 00:00:00
+date: 2019/7/12 00:00:00
 categories:
 - AWS
 ---
