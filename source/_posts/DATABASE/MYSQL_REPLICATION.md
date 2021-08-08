@@ -1,8 +1,8 @@
 ---
-title: '리플리케이션'
+title: 'MYSQL 리플리케이션'
 date: 2019/7/14 00:00:00
 categories:
-- MESSAGING
+- DATABASE
 ---
 
 # 리플리케이션
